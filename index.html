@@ -19,7 +19,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
     
-    <!-- YouTube IFrame API for reels -->
+    <!-- YouTube IFrame API -->
     <script src="https://www.youtube.com/iframe_api"></script>
     
     <style>
@@ -288,7 +288,7 @@
             }
         }
 
-        /* Reels Container - YouTube Style */
+        /* Reels Container */
         .reels-container {
             height: calc(100vh - 140px);
             overflow-y: scroll;
@@ -739,6 +739,30 @@
             z-index: 100;
         }
 
+        /* Error State */
+        .error-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray);
+        }
+
+        .error-state i {
+            font-size: 48px;
+            color: var(--danger);
+            margin-bottom: 16px;
+        }
+
+        .retry-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
         @media (max-width: 428px) {
             .earn-grid {
                 grid-template-columns: 1fr;
@@ -847,18 +871,17 @@
                 </div>
             </div>
 
-            <!-- Home Section - Reels from Admin -->
+            <!-- Home Section -->
             <div id="homeSection" class="content-section active">
                 <div class="reels-container" id="reelsContainer">
-                    <!-- Reels loaded from Firebase -->
-                    <div style="text-align: center; padding: 50px;">
+                    <div class="loading-state">
                         <div class="spinner"></div>
                         <p style="color: var(--gray); margin-top: 20px;">Loading reels...</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Earn Section - Settings from Admin -->
+            <!-- Earn Section -->
             <div id="earnSection" class="content-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 style="color: var(--dark); font-size: 24px; font-weight: 800;">Earn Coins</h2>
@@ -879,11 +902,11 @@
                         </button>
                     </div>
                     <div class="checkin-days" id="checkinDays">
-                        <!-- Dynamic from settings -->
+                        <!-- Dynamic -->
                     </div>
                 </div>
 
-                <!-- Tasks from Admin -->
+                <!-- Tasks Container -->
                 <div id="tasksContainer" class="task-grid">
                     <!-- Tasks loaded from Firebase -->
                 </div>
@@ -972,7 +995,7 @@
                     <div style="margin-top: 30px;">
                         <h4 style="color: var(--dark); margin-bottom: 16px;">Recent Transactions</h4>
                         <div id="transactionHistory">
-                            <!-- Transactions loaded from Firebase -->
+                            <p style="color: var(--gray); text-align: center;">Loading...</p>
                         </div>
                     </div>
                 </div>
@@ -1011,7 +1034,7 @@
                     
                     <h4 style="color: var(--dark); margin-bottom: 16px;">Recent Invites</h4>
                     <div id="recentInvites">
-                        <!-- Invites loaded from Firebase -->
+                        <p style="color: var(--gray); text-align: center;">No invites yet</p>
                     </div>
                 </div>
             </div>
@@ -1097,10 +1120,16 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // Enable offline persistence
-        db.enablePersistence().catch(err => {
-            console.log('Persistence error:', err);
-        });
+        // Enable offline persistence with modern approach
+        db.enablePersistence()
+            .then(() => console.log('Offline persistence enabled'))
+            .catch(err => {
+                if (err.code == 'failed-precondition') {
+                    console.log('Multiple tabs open, persistence disabled');
+                } else if (err.code == 'unimplemented') {
+                    console.log('Browser doesn\'t support persistence');
+                }
+            });
 
         // ============= GLOBAL VARIABLES =============
         let currentUser = null;
@@ -1134,6 +1163,7 @@
         }
 
         function extractYouTubeID(url) {
+            if (!url) return null;
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
             const match = url.match(regExp);
             return (match && match[2].length === 11) ? match[2] : null;
@@ -1249,21 +1279,33 @@
             container.innerHTML = '<div style="text-align: center; padding: 50px;"><div class="spinner"></div><p style="color: var(--gray); margin-top: 20px;">Loading reels...</p></div>';
 
             try {
+                // Simple query without complex ordering first
                 const snapshot = await db.collection('videos')
                     .where('status', '==', 'active')
-                    .orderBy('createdAt', 'desc')
                     .get();
 
                 if (snapshot.empty) {
-                    container.innerHTML = '<div style="text-align: center; padding: 50px; color: var(--gray);">No videos yet</div>';
+                    container.innerHTML = '<div class="error-state"><i class="fas fa-video"></i><p>No videos available</p></div>';
                     return;
                 }
+
+                // Sort manually
+                const videos = [];
+                snapshot.forEach(doc => {
+                    videos.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // Sort by createdAt descending (newest first)
+                videos.sort((a, b) => {
+                    const dateA = a.createdAt?.toDate() || new Date(0);
+                    const dateB = b.createdAt?.toDate() || new Date(0);
+                    return dateB - dateA;
+                });
 
                 container.innerHTML = '';
                 let index = 0;
 
-                snapshot.forEach(doc => {
-                    const video = doc.data();
+                for (const video of videos) {
                     const videoId = extractYouTubeID(video.url);
                     
                     if (videoId) {
@@ -1295,57 +1337,71 @@
                         container.appendChild(reelDiv);
                         index++;
                     }
-                });
+                }
+
+                if (index === 0) {
+                    container.innerHTML = '<div class="error-state"><i class="fas fa-video"></i><p>No valid videos found</p></div>';
+                    return;
+                }
 
                 // Initialize YouTube players
                 youtubePlayers = [];
-                window.onYouTubeIframeAPIReady = function() {
+                
+                // Function to initialize players
+                function initPlayers() {
                     document.querySelectorAll('.reel-item').forEach((item, idx) => {
                         const videoId = item.dataset.videoId;
-                        if (videoId) {
-                            const player = new YT.Player(`youtube-player-${idx}`, {
-                                videoId: videoId,
-                                playerVars: {
-                                    autoplay: 0,
-                                    controls: 0,
-                                    modestbranding: 1,
-                                    rel: 0,
-                                    showinfo: 0,
-                                    iv_load_policy: 3,
-                                    fs: 0,
-                                    playsinline: 1,
-                                    loop: 1,
-                                    playlist: videoId
-                                },
-                                events: {
-                                    onReady: onPlayerReady,
-                                    onStateChange: onPlayerStateChange
-                                }
-                            });
-                            youtubePlayers.push(player);
+                        if (videoId && window.YT && window.YT.Player) {
+                            try {
+                                const player = new YT.Player(`youtube-player-${idx}`, {
+                                    videoId: videoId,
+                                    playerVars: {
+                                        autoplay: 0,
+                                        controls: 0,
+                                        modestbranding: 1,
+                                        rel: 0,
+                                        showinfo: 0,
+                                        iv_load_policy: 3,
+                                        fs: 0,
+                                        playsinline: 1,
+                                        loop: 1,
+                                        playlist: videoId
+                                    },
+                                    events: {
+                                        onReady: (event) => console.log(`Player ${idx} ready`),
+                                        onStateChange: (event) => {
+                                            // Handle state changes if needed
+                                        }
+                                    }
+                                });
+                                youtubePlayers[idx] = player;
+                            } catch (e) {
+                                console.error(`Error creating player ${idx}:`, e);
+                            }
                         }
                     });
-                };
+                }
 
-                // If API already loaded
+                // If YouTube API is already loaded
                 if (window.YT && window.YT.Player) {
-                    window.onYouTubeIframeAPIReady();
+                    initPlayers();
+                } else {
+                    // Wait for API to load
+                    window.onYouTubeIframeAPIReady = initPlayers;
                 }
 
                 initReelObserver();
 
             } catch (error) {
                 console.error('Error loading videos:', error);
-                container.innerHTML = '<div style="text-align: center; padding: 50px; color: var(--gray);">Failed to load videos</div>';
+                container.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Failed to load videos</p>
+                        <button class="retry-btn" onclick="loadReels()">Retry</button>
+                    </div>
+                `;
             }
-        }
-
-        function onPlayerReady(event) {
-            // Player ready
-        }
-
-        function onPlayerStateChange(event) {
-            // Handle player state changes
         }
 
         function initReelObserver() {
@@ -1354,7 +1410,7 @@
                     if (entry.isIntersecting) {
                         const index = entry.target.dataset.index;
                         const player = youtubePlayers[index];
-                        if (player) {
+                        if (player && typeof player.playVideo === 'function') {
                             // Pause all other players
                             youtubePlayers.forEach((p, i) => {
                                 if (i != index && p && typeof p.pauseVideo === 'function') {
@@ -1394,7 +1450,8 @@
                 }
 
                 if (timerElement) {
-                    timerElement.innerHTML = `<i class="fas fa-clock"></i> Watch ${requiredSeconds - secondsWatched}s to earn`;
+                    const remaining = requiredSeconds - secondsWatched;
+                    timerElement.innerHTML = `<i class="fas fa-clock"></i> Watch ${remaining}s to earn`;
                 }
 
                 if (secondsWatched >= requiredSeconds && !rewarded && currentUser) {
@@ -1415,7 +1472,6 @@
             const container = document.getElementById('tasksContainer');
             
             try {
-                const now = new Date();
                 const snapshot = await db.collection('tasks')
                     .where('status', '==', 'active')
                     .get();
@@ -1427,12 +1483,14 @@
 
                 container.style.display = 'grid';
                 container.innerHTML = '';
+                let hasValidTasks = false;
 
                 snapshot.forEach(doc => {
                     const task = doc.data();
                     const expiryDate = task.expiryDate?.toDate();
                     
                     if (expiryDate && expiryDate > new Date()) {
+                        hasValidTasks = true;
                         container.innerHTML += `
                             <div class="task-card" onclick="completeTask('${doc.id}', ${task.reward})">
                                 <div class="task-icon">
@@ -1448,10 +1506,56 @@
                     }
                 });
 
+                if (!hasValidTasks) {
+                    container.style.display = 'none';
+                }
+
             } catch (error) {
                 console.error('Error loading tasks:', error);
+                container.style.display = 'none';
             }
         }
+
+        window.completeTask = async function(taskId, reward) {
+            if (!currentUser) {
+                showToast('Please login first', 'error');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                // Check if task already completed
+                const completionSnapshot = await db.collection('task_completions')
+                    .where('taskId', '==', taskId)
+                    .where('userId', '==', currentUser.uid)
+                    .get();
+
+                if (!completionSnapshot.empty) {
+                    showToast('Task already completed', 'error');
+                    hideLoading();
+                    return;
+                }
+
+                // Add completion record
+                await db.collection('task_completions').add({
+                    taskId,
+                    userId: currentUser.uid,
+                    completedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Add coins
+                await addCoins(reward, 'task_reward', 'Completed task');
+                
+                showToast(`+${reward} coins for task!`);
+                
+            } catch (error) {
+                console.error('Error completing task:', error);
+                showToast(error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        };
 
         // ============= AUTH FUNCTIONS =============
         window.toggleForms = function(form) {
@@ -1528,6 +1632,7 @@
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     lastActive: firebase.firestore.FieldValue.serverTimestamp(),
                     checkInStreak: 0,
+                    lastCheckIn: null,
                     spinsRemaining: 2,
                     totalReferrals: 0,
                     activeReferrals: 0,
@@ -1846,10 +1951,9 @@
             if (!currentUser) return;
 
             try {
+                // Simple query first
                 const snapshot = await db.collection('transactions')
                     .where('userId', '==', currentUser.uid)
-                    .orderBy('timestamp', 'desc')
-                    .limit(10)
                     .get();
 
                 const historyDiv = document.getElementById('transactionHistory');
@@ -1859,9 +1963,24 @@
                     return;
                 }
 
-                historyDiv.innerHTML = '';
+                // Sort manually
+                const transactions = [];
                 snapshot.forEach(doc => {
-                    const data = doc.data();
+                    transactions.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // Sort by timestamp descending
+                transactions.sort((a, b) => {
+                    const dateA = a.timestamp?.toDate() || new Date(0);
+                    const dateB = b.timestamp?.toDate() || new Date(0);
+                    return dateB - dateA;
+                });
+
+                // Take last 10
+                const recentTransactions = transactions.slice(0, 10);
+
+                historyDiv.innerHTML = '';
+                recentTransactions.forEach(data => {
                     const date = data.timestamp?.toDate() || new Date();
                     const isCredit = data.type !== 'withdrawal';
                     
@@ -1880,6 +1999,7 @@
 
             } catch (error) {
                 console.error('Error loading transactions:', error);
+                document.getElementById('transactionHistory').innerHTML = '<p style="color: var(--gray); text-align: center;">Failed to load transactions</p>';
             }
         }
 
@@ -1974,11 +2094,10 @@
                     
                     // Check if user is admin
                     if (userData.role === 'admin' || userData.role === 'super_admin') {
-                        document.getElementById('profileHeader').innerHTML += `
-                            <span class="admin-badge">
-                                <i class="fas fa-crown"></i> Admin
-                            </span>
-                        `;
+                        const badge = document.createElement('span');
+                        badge.className = 'admin-badge';
+                        badge.innerHTML = '<i class="fas fa-crown"></i> Admin';
+                        document.getElementById('profileHeader').appendChild(badge);
                     }
                 }
             } catch (error) {
@@ -2030,6 +2149,14 @@
         // ============= AUTH STATE OBSERVER =============
         auth.onAuthStateChanged(async (user) => {
             if (user) {
+                // Check if user is blocked
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists && userDoc.data().isBlocked) {
+                    await auth.signOut();
+                    showToast('Your account has been blocked', 'error');
+                    return;
+                }
+
                 currentUser = user;
                 await loadUserData(user.uid);
                 
