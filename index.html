@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CoinFlow • Earn Real Money</title>
     
-    <!-- PWA Support - Comment out until you add icons -->
-    <!-- <link rel="manifest" href="manifest.json"> -->
+    <!-- PWA Support -->
     <meta name="theme-color" content="#FF6B4A">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -15,10 +14,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase SDK (Global Version - CORRECT) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    
+    <!-- YouTube IFrame API for reels -->
+    <script src="https://www.youtube.com/iframe_api"></script>
     
     <style>
         /* ===== COMPLETE STYLING ===== */
@@ -112,13 +114,6 @@
             margin-bottom: 10px;
         }
 
-        .splash-sub {
-            font-size: 16px;
-            color: var(--gray);
-            letter-spacing: 4px;
-            text-transform: uppercase;
-        }
-
         /* Auth Screen */
         .auth-screen {
             padding: 24px;
@@ -155,12 +150,6 @@
             font-size: 32px;
             font-weight: 800;
             color: var(--dark);
-            margin-bottom: 8px;
-        }
-
-        .auth-subtitle {
-            color: var(--gray);
-            font-size: 15px;
         }
 
         /* Form Controls */
@@ -299,7 +288,7 @@
             }
         }
 
-        /* Reels */
+        /* Reels Container - YouTube Style */
         .reels-container {
             height: calc(100vh - 140px);
             overflow-y: scroll;
@@ -319,14 +308,26 @@
             border-radius: 24px;
             overflow: hidden;
             margin-bottom: 12px;
-            background: var(--dark);
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            background: #000;
         }
 
-        .reel-video {
+        .youtube-container {
+            position: relative;
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            overflow: hidden;
+        }
+
+        .youtube-player {
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .youtube-player iframe {
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
         }
 
         .reel-overlay {
@@ -337,6 +338,7 @@
             padding: 30px 20px;
             background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
             color: white;
+            z-index: 10;
         }
 
         .reel-user {
@@ -357,6 +359,21 @@
             font-weight: 700;
         }
 
+        .reel-info {
+            margin-bottom: 8px;
+        }
+
+        .reel-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .reel-description {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
         .reel-timer {
             position: absolute;
             top: 20px;
@@ -368,6 +385,17 @@
             border-radius: 30px;
             font-size: 13px;
             font-weight: 600;
+            z-index: 10;
+        }
+
+        .reel-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+            z-index: 20;
         }
 
         /* Earn Cards */
@@ -406,7 +434,6 @@
             margin: 0 auto 16px;
             color: white;
             font-size: 28px;
-            box-shadow: 0 10px 20px rgba(255,107,74,0.2);
         }
 
         .earn-reward {
@@ -423,8 +450,6 @@
             border-radius: 24px;
             color: white;
             margin-bottom: 24px;
-            position: relative;
-            overflow: hidden;
         }
 
         .checkin-days {
@@ -436,7 +461,6 @@
 
         .checkin-day {
             background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
             padding: 12px 4px;
             border-radius: 12px;
             text-align: center;
@@ -447,6 +471,12 @@
         .checkin-day.active {
             background: #00D09C;
             box-shadow: 0 0 20px #00D09C;
+        }
+
+        .checkin-day.completed {
+            background: var(--success);
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         /* Task Cards */
@@ -503,6 +533,11 @@
             cursor: pointer;
         }
 
+        .task-btn.completed {
+            background: var(--gray);
+            cursor: not-allowed;
+        }
+
         /* Wallet Card */
         .wallet-card {
             background: linear-gradient(135deg, #1A2E45 0%, #2C4056 100%);
@@ -523,6 +558,22 @@
             grid-template-columns: 1fr 1fr;
             gap: 20px;
             margin-top: 24px;
+        }
+
+        /* Transaction History */
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #EDF2F7;
+        }
+
+        .transaction-amount.positive {
+            color: var(--success);
+        }
+
+        .transaction-amount.negative {
+            color: var(--danger);
         }
 
         /* Spin Wheel Modal */
@@ -581,8 +632,8 @@
             font-weight: 600;
             z-index: 9999;
             display: none;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            max-width: 90%;
+            text-align: center;
         }
 
         .toast.show {
@@ -600,6 +651,9 @@
                 transform: translate(-50%, 0);
             }
         }
+
+        .toast.success { background: rgba(16, 185, 129, 0.95); }
+        .toast.error { background: rgba(239, 68, 68, 0.95); }
 
         /* Loading */
         .spinner {
@@ -643,6 +697,31 @@
             display: none;
         }
 
+        /* Maintenance Mode */
+        .maintenance-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15,26,43,0.98);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .maintenance-content {
+            text-align: center;
+            color: white;
+        }
+
+        .maintenance-content i {
+            font-size: 64px;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
         /* Admin Badge */
         .admin-badge {
             position: absolute;
@@ -657,6 +736,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            z-index: 100;
         }
 
         @media (max-width: 428px) {
@@ -767,18 +847,22 @@
                 </div>
             </div>
 
-            <!-- Home Section -->
+            <!-- Home Section - Reels from Admin -->
             <div id="homeSection" class="content-section active">
                 <div class="reels-container" id="reelsContainer">
-                    <!-- Reels will be loaded -->
+                    <!-- Reels loaded from Firebase -->
+                    <div style="text-align: center; padding: 50px;">
+                        <div class="spinner"></div>
+                        <p style="color: var(--gray); margin-top: 20px;">Loading reels...</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Earn Section -->
+            <!-- Earn Section - Settings from Admin -->
             <div id="earnSection" class="content-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 style="color: var(--dark); font-size: 24px; font-weight: 800;">Earn Coins</h2>
-                    <span style="background: var(--gradient); color: white; padding: 8px 16px; border-radius: 30px; font-size: 14px; font-weight: 600;">
+                    <span style="background: var(--gradient); color: white; padding: 8px 16px; border-radius: 30px; font-size: 14px;" id="userLevel">
                         <i class="fas fa-star"></i> Level 1
                     </span>
                 </div>
@@ -790,31 +874,38 @@
                             <h3 style="font-size: 20px; margin-bottom: 8px;">Daily Check-in</h3>
                             <p style="opacity: 0.9;">Day <span id="currentStreak">1</span> • +<span id="checkinReward">10</span> coins</p>
                         </div>
-                        <button class="btn btn-outline" onclick="handleCheckIn()" style="width: auto; padding: 12px 24px; background: white; color: var(--primary); border: none;">
+                        <button class="btn btn-outline" onclick="handleCheckIn()" style="width: auto; padding: 12px 24px; background: white; color: var(--primary); border: none;" id="checkinBtn">
                             Check In
                         </button>
                     </div>
                     <div class="checkin-days" id="checkinDays">
-                        <!-- Dynamic -->
+                        <!-- Dynamic from settings -->
                     </div>
                 </div>
 
+                <!-- Tasks from Admin -->
+                <div id="tasksContainer" class="task-grid">
+                    <!-- Tasks loaded from Firebase -->
+                </div>
+
                 <div class="earn-grid">
+                    <!-- Watch Ads -->
                     <div class="earn-card" onclick="handleWatchAd()">
                         <div class="earn-icon">
                             <i class="fas fa-play"></i>
                         </div>
                         <h3 style="color: var(--dark);">Watch Ads</h3>
-                        <div class="earn-reward">5-10 Coins</div>
+                        <div class="earn-reward" id="videoReward">5-10 Coins</div>
                         <button class="btn btn-primary" style="margin-top: 16px; padding: 12px;">Watch Now</button>
                     </div>
 
+                    <!-- Spin Wheel -->
                     <div class="earn-card" onclick="openSpinWheel()">
                         <div class="earn-icon">
                             <i class="fas fa-circle-notch"></i>
                         </div>
                         <h3 style="color: var(--dark);">Spin Wheel</h3>
-                        <div class="earn-reward" id="spinsLeft">2 Spins Left</div>
+                        <div class="earn-reward" id="spinsLeft">0 Spins Left</div>
                         <button class="btn btn-primary" style="margin-top: 16px; padding: 12px;">Spin</button>
                     </div>
                 </div>
@@ -845,11 +936,15 @@
                     <div style="background: #F8FAFC; padding: 16px; border-radius: 16px; margin-bottom: 24px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                             <span style="color: var(--gray);">Min. Withdrawal</span>
-                            <span style="font-weight: 700; color: var(--primary);">৳ 50</span>
+                            <span style="font-weight: 700; color: var(--primary);" id="minWithdrawal">৳ 50</span>
                         </div>
                         <div style="display: flex; justify-content: space-between;">
                             <span style="color: var(--gray);">Max. Withdrawal</span>
-                            <span style="font-weight: 700; color: var(--primary);">৳ 10000</span>
+                            <span style="font-weight: 700; color: var(--primary);" id="maxWithdrawal">৳ 10000</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                            <span style="color: var(--gray);">Processing Time</span>
+                            <span style="font-weight: 700; color: var(--primary);" id="processingTime">24-48 hours</span>
                         </div>
                     </div>
                     
@@ -857,8 +952,6 @@
                         <i class="fas fa-university"></i>
                         <select class="form-control" id="withdrawMethod" style="padding-left: 45px;">
                             <option value="">Select Payment Method</option>
-                            <option value="bkash">bKash</option>
-                            <option value="nagad">Nagad</option>
                         </select>
                     </div>
                     
@@ -878,7 +971,9 @@
                     
                     <div style="margin-top: 30px;">
                         <h4 style="color: var(--dark); margin-bottom: 16px;">Recent Transactions</h4>
-                        <div id="transactionHistory"></div>
+                        <div id="transactionHistory">
+                            <!-- Transactions loaded from Firebase -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -888,8 +983,8 @@
                 <div style="background: linear-gradient(145deg, #FF6B4A, #FF8E6A); padding: 32px 24px; border-radius: 24px; color: white; text-align: center; margin-bottom: 24px;">
                     <i class="fas fa-gift" style="font-size: 48px; margin-bottom: 16px;"></i>
                     <h2 style="font-size: 28px; margin-bottom: 12px;">Invite Friends</h2>
-                    <p>Get 50 coins per invite</p>
-                    <div style="background: rgba(255,255,255,0.15); padding: 16px; border-radius: 16px; font-size: 28px; font-weight: 800; letter-spacing: 8px; margin: 24px 0;" id="referralCodeDisplay">
+                    <p>Get <span id="referralBonus">50</span> coins per invite</p>
+                    <div style="background: rgba(255,255,255,0.15); padding: 16px; border-radius: 16px; font-size: 28px; font-weight: 800; letter-spacing: 8px; margin: 24px 0;" id="referralCodeDisplay" onclick="copyReferralCode()">
                         LOADING...
                     </div>
                     <div style="display: flex; gap: 12px;">
@@ -897,22 +992,49 @@
                         <button class="btn btn-outline" onclick="shareReferralCode()" style="flex: 1; background: white;">Share</button>
                     </div>
                 </div>
+
+                <div style="background: white; padding: 24px; border-radius: 24px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                        <div style="text-align: center;">
+                            <h3 style="color: var(--primary); font-size: 28px;" id="totalReferrals">0</h3>
+                            <span style="color: var(--gray);">Total</span>
+                        </div>
+                        <div style="text-align: center;">
+                            <h3 style="color: var(--accent); font-size: 28px;" id="activeReferrals">0</h3>
+                            <span style="color: var(--gray);">Active</span>
+                        </div>
+                        <div style="text-align: center;">
+                            <h3 style="color: #FFD700; font-size: 28px;" id="referralEarnings">0</h3>
+                            <span style="color: var(--gray);">Earned</span>
+                        </div>
+                    </div>
+                    
+                    <h4 style="color: var(--dark); margin-bottom: 16px;">Recent Invites</h4>
+                    <div id="recentInvites">
+                        <!-- Invites loaded from Firebase -->
+                    </div>
+                </div>
             </div>
 
             <!-- Profile Section -->
             <div id="profileSection" class="content-section">
-                <div style="background: linear-gradient(135deg, #1A2E45 0%, #2C4056 100%); padding: 32px 24px; border-radius: 24px; color: white; display: flex; align-items: center; gap: 20px; margin-bottom: 24px;">
+                <div style="background: linear-gradient(135deg, #1A2E45 0%, #2C4056 100%); padding: 32px 24px; border-radius: 24px; color: white; display: flex; align-items: center; gap: 20px; margin-bottom: 24px; position: relative;" id="profileHeader">
                     <div style="width: 80px; height: 80px; background: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: var(--primary);">
                         <i class="fas fa-user"></i>
                     </div>
                     <div>
                         <h3 style="font-size: 24px; margin-bottom: 4px;" id="profileUsername">Loading...</h3>
                         <p style="opacity: 0.9;" id="profileUserId">@loading</p>
+                        <p style="opacity: 0.9; font-size: 13px;" id="profilePhone">Loading...</p>
                     </div>
                 </div>
 
                 <div style="background: white; border-radius: 24px; padding: 24px;">
-                    <div style="display: flex; align-items: center; padding: 16px; background: #F8FAFC; border-radius: 16px; margin-bottom: 12px; cursor: pointer;" onclick="handleLogout()">
+                    <div style="display: flex; align-items: center; padding: 16px; background: #F8FAFC; border-radius: 16px; margin-bottom: 12px; cursor: pointer;" onclick="window.location.href='admin.html'">
+                        <i class="fas fa-cog" style="color: var(--primary); margin-right: 16px;"></i>
+                        <span style="color: var(--dark); font-weight: 600;">Admin Panel</span>
+                    </div>
+                    <div style="display: flex; align-items: center; padding: 16px; background: #FEF2F2; border-radius: 16px; cursor: pointer;" onclick="handleLogout()">
                         <i class="fas fa-sign-out-alt" style="color: #EF4444; margin-right: 16px;"></i>
                         <span style="color: #EF4444; font-weight: 600;">Logout</span>
                     </div>
@@ -948,10 +1070,19 @@
         <div id="offlineIndicator" class="offline-indicator">
             <i class="fas fa-wifi-slash"></i> You are offline
         </div>
+
+        <!-- Maintenance Mode Overlay -->
+        <div id="maintenanceOverlay" class="maintenance-overlay" style="display: none;">
+            <div class="maintenance-content">
+                <i class="fas fa-tools"></i>
+                <h2>Under Maintenance</h2>
+                <p id="maintenanceMessage">We'll be back soon!</p>
+            </div>
+        </div>
     </div>
 
     <script>
-        // ============= FIREBASE INIT (CORRECT VERSION) =============
+        // ============= FIREBASE CONFIG =============
         const firebaseConfig = {
             apiKey: "AIzaSyDhM8LtJKXnSI9nsJLWs1Dpj9WBpEr8B_I",
             authDomain: "coinflow-a5496.firebaseapp.com",
@@ -961,17 +1092,25 @@
             appId: "1:654252221891:web:1992c59199780625930976"
         };
 
-        // Initialize Firebase (using compat version)
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        console.log('✅ Firebase initialized successfully');
+        // Enable offline persistence
+        db.enablePersistence().catch(err => {
+            console.log('Persistence error:', err);
+        });
 
         // ============= GLOBAL VARIABLES =============
         let currentUser = null;
         let userData = null;
-        let spinsLeft = 2;
+        let appSettings = null;
+        let earningRates = null;
+        let withdrawalSettings = null;
+        let youtubePlayers = [];
+        let currentVideoIndex = 0;
+        let videoTimer = null;
 
         // ============= HELPER FUNCTIONS =============
         function showToast(message, type = 'success') {
@@ -988,6 +1127,330 @@
 
         function hideLoading() {
             document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        function generateReferralCode() {
+            return 'CF' + Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
+        function extractYouTubeID(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        // ============= LOAD APP SETTINGS =============
+        async function loadAppSettings() {
+            try {
+                // Load app config
+                const configDoc = await db.collection('app_config').doc('current').get();
+                if (configDoc.exists) {
+                    appSettings = configDoc.data();
+                    
+                    // Check maintenance mode
+                    if (appSettings.maintenanceMode) {
+                        document.getElementById('maintenanceOverlay').style.display = 'flex';
+                        document.getElementById('maintenanceMessage').textContent = appSettings.maintenanceMessage || 'Under maintenance';
+                    }
+                }
+
+                // Load earning rates
+                const ratesDoc = await db.collection('settings_earnings').doc('current').get();
+                if (ratesDoc.exists) {
+                    earningRates = ratesDoc.data();
+                    updateEarningUI();
+                }
+
+                // Load withdrawal settings
+                const withdrawDoc = await db.collection('settings_withdrawal').doc('current').get();
+                if (withdrawDoc.exists) {
+                    withdrawalSettings = withdrawDoc.data();
+                    updateWithdrawalUI();
+                }
+
+                // Listen for real-time updates
+                db.collection('app_config').doc('current').onSnapshot(doc => {
+                    if (doc.exists) {
+                        appSettings = doc.data();
+                        if (appSettings.maintenanceMode) {
+                            document.getElementById('maintenanceOverlay').style.display = 'flex';
+                            document.getElementById('maintenanceMessage').textContent = appSettings.maintenanceMessage;
+                        } else {
+                            document.getElementById('maintenanceOverlay').style.display = 'none';
+                        }
+                    }
+                });
+
+                db.collection('settings_earnings').doc('current').onSnapshot(doc => {
+                    if (doc.exists) {
+                        earningRates = doc.data();
+                        updateEarningUI();
+                    }
+                });
+
+                db.collection('settings_withdrawal').doc('current').onSnapshot(doc => {
+                    if (doc.exists) {
+                        withdrawalSettings = doc.data();
+                        updateWithdrawalUI();
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+
+        function updateEarningUI() {
+            if (!earningRates) return;
+
+            // Update check-in rewards
+            const checkinReward = document.getElementById('checkinReward');
+            if (checkinReward && userData) {
+                const streak = userData.checkInStreak || 0;
+                const reward = earningRates.checkinRewards?.[`day${Math.min(streak + 1, 7)}`] || 10;
+                checkinReward.textContent = reward;
+            }
+
+            // Update video rewards
+            const videoReward = document.getElementById('videoReward');
+            if (videoReward) {
+                videoReward.textContent = `${earningRates.videoRewards?.min || 5}-${earningRates.videoRewards?.max || 10} Coins`;
+            }
+
+            // Update referral bonus
+            const referralBonus = document.getElementById('referralBonus');
+            if (referralBonus) {
+                referralBonus.textContent = earningRates.referralBonus || 50;
+            }
+        }
+
+        function updateWithdrawalUI() {
+            if (!withdrawalSettings) return;
+
+            document.getElementById('minWithdrawal').textContent = `৳ ${withdrawalSettings.minAmount || 50}`;
+            document.getElementById('maxWithdrawal').textContent = `৳ ${withdrawalSettings.maxAmount || 10000}`;
+            document.getElementById('processingTime').textContent = withdrawalSettings.processingTime || '24-48 hours';
+
+            // Update payment methods
+            const methodSelect = document.getElementById('withdrawMethod');
+            methodSelect.innerHTML = '<option value="">Select Payment Method</option>';
+            if (withdrawalSettings.methods) {
+                withdrawalSettings.methods.forEach(method => {
+                    if (method.enabled) {
+                        methodSelect.innerHTML += `<option value="${method.id}">${method.name}</option>`;
+                    }
+                });
+            }
+        }
+
+        // ============= REELS FROM ADMIN =============
+        async function loadReels() {
+            const container = document.getElementById('reelsContainer');
+            container.innerHTML = '<div style="text-align: center; padding: 50px;"><div class="spinner"></div><p style="color: var(--gray); margin-top: 20px;">Loading reels...</p></div>';
+
+            try {
+                const snapshot = await db.collection('videos')
+                    .where('status', '==', 'active')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+
+                if (snapshot.empty) {
+                    container.innerHTML = '<div style="text-align: center; padding: 50px; color: var(--gray);">No videos yet</div>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                let index = 0;
+
+                snapshot.forEach(doc => {
+                    const video = doc.data();
+                    const videoId = extractYouTubeID(video.url);
+                    
+                    if (videoId) {
+                        const reelDiv = document.createElement('div');
+                        reelDiv.className = 'reel-item';
+                        reelDiv.setAttribute('data-index', index);
+                        reelDiv.setAttribute('data-video-id', videoId);
+                        reelDiv.setAttribute('data-reward', video.reward || 5);
+                        
+                        reelDiv.innerHTML = `
+                            <div class="youtube-container">
+                                <div id="youtube-player-${index}" class="youtube-player"></div>
+                            </div>
+                            <div class="reel-overlay">
+                                <div class="reel-user">
+                                    <div class="reel-avatar">${video.username?.charAt(0) || 'A'}</div>
+                                    <div class="reel-info">
+                                        <div class="reel-title">${video.title || 'Video'}</div>
+                                        <div class="reel-description">${video.description || ''}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="reel-timer" id="timer-${index}">
+                                <i class="fas fa-clock"></i> Watch 5s to earn
+                            </div>
+                            <div class="reel-progress" id="progress-${index}" style="width: 0%;"></div>
+                        `;
+                        
+                        container.appendChild(reelDiv);
+                        index++;
+                    }
+                });
+
+                // Initialize YouTube players
+                youtubePlayers = [];
+                window.onYouTubeIframeAPIReady = function() {
+                    document.querySelectorAll('.reel-item').forEach((item, idx) => {
+                        const videoId = item.dataset.videoId;
+                        if (videoId) {
+                            const player = new YT.Player(`youtube-player-${idx}`, {
+                                videoId: videoId,
+                                playerVars: {
+                                    autoplay: 0,
+                                    controls: 0,
+                                    modestbranding: 1,
+                                    rel: 0,
+                                    showinfo: 0,
+                                    iv_load_policy: 3,
+                                    fs: 0,
+                                    playsinline: 1,
+                                    loop: 1,
+                                    playlist: videoId
+                                },
+                                events: {
+                                    onReady: onPlayerReady,
+                                    onStateChange: onPlayerStateChange
+                                }
+                            });
+                            youtubePlayers.push(player);
+                        }
+                    });
+                };
+
+                // If API already loaded
+                if (window.YT && window.YT.Player) {
+                    window.onYouTubeIframeAPIReady();
+                }
+
+                initReelObserver();
+
+            } catch (error) {
+                console.error('Error loading videos:', error);
+                container.innerHTML = '<div style="text-align: center; padding: 50px; color: var(--gray);">Failed to load videos</div>';
+            }
+        }
+
+        function onPlayerReady(event) {
+            // Player ready
+        }
+
+        function onPlayerStateChange(event) {
+            // Handle player state changes
+        }
+
+        function initReelObserver() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const index = entry.target.dataset.index;
+                        const player = youtubePlayers[index];
+                        if (player) {
+                            // Pause all other players
+                            youtubePlayers.forEach((p, i) => {
+                                if (i != index && p && typeof p.pauseVideo === 'function') {
+                                    p.pauseVideo();
+                                }
+                            });
+                            
+                            // Play current
+                            player.playVideo();
+                            currentVideoIndex = index;
+                            startVideoTimer(index);
+                        }
+                    }
+                });
+            }, { threshold: 0.7 });
+
+            document.querySelectorAll('.reel-item').forEach(item => {
+                observer.observe(item);
+            });
+        }
+
+        function startVideoTimer(index) {
+            if (videoTimer) clearInterval(videoTimer);
+            
+            const timerElement = document.getElementById(`timer-${index}`);
+            const progressElement = document.getElementById(`progress-${index}`);
+            const reelItem = document.querySelector(`[data-index="${index}"]`);
+            const requiredSeconds = 5;
+            let secondsWatched = 0;
+            let rewarded = false;
+
+            videoTimer = setInterval(() => {
+                secondsWatched++;
+                const progress = (secondsWatched / requiredSeconds) * 100;
+                if (progressElement) {
+                    progressElement.style.width = progress + '%';
+                }
+
+                if (timerElement) {
+                    timerElement.innerHTML = `<i class="fas fa-clock"></i> Watch ${requiredSeconds - secondsWatched}s to earn`;
+                }
+
+                if (secondsWatched >= requiredSeconds && !rewarded && currentUser) {
+                    rewarded = true;
+                    const reward = parseInt(reelItem?.dataset.reward || 5);
+                    addCoins(reward, 'video_reward', 'Watched video');
+                    showToast(`+${reward} coins for watching!`);
+                    
+                    if (timerElement) {
+                        timerElement.innerHTML = `<i class="fas fa-check"></i> Reward claimed!`;
+                    }
+                }
+            }, 1000);
+        }
+
+        // ============= TASKS FROM ADMIN =============
+        async function loadTasks() {
+            const container = document.getElementById('tasksContainer');
+            
+            try {
+                const now = new Date();
+                const snapshot = await db.collection('tasks')
+                    .where('status', '==', 'active')
+                    .get();
+
+                if (snapshot.empty) {
+                    container.style.display = 'none';
+                    return;
+                }
+
+                container.style.display = 'grid';
+                container.innerHTML = '';
+
+                snapshot.forEach(doc => {
+                    const task = doc.data();
+                    const expiryDate = task.expiryDate?.toDate();
+                    
+                    if (expiryDate && expiryDate > new Date()) {
+                        container.innerHTML += `
+                            <div class="task-card" onclick="completeTask('${doc.id}', ${task.reward})">
+                                <div class="task-icon">
+                                    <i class="fas ${task.icon || 'fa-tasks'}"></i>
+                                </div>
+                                <div class="task-info">
+                                    <h4 class="task-title">${task.title}</h4>
+                                    <p class="task-reward">+${task.reward} coins</p>
+                                </div>
+                                <button class="task-btn">Complete</button>
+                            </div>
+                        `;
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+            }
         }
 
         // ============= AUTH FUNCTIONS =============
@@ -1026,28 +1489,77 @@
             const userId = document.getElementById('signupUserId').value.trim();
             const phone = document.getElementById('signupPhone').value.trim();
             const password = document.getElementById('signupPassword').value;
+            const inviteCode = document.getElementById('inviteCode').value.trim();
 
             if (!username || !userId || !phone || !password) {
                 showToast('Please fill all fields', 'error');
                 return;
             }
 
+            if (!/^\d{11}$/.test(phone)) {
+                showToast('Phone must be 11 digits', 'error');
+                return;
+            }
+
             showLoading();
 
             try {
+                // Check if phone exists
+                const phoneSnapshot = await db.collection('users').where('phone', '==', phone).get();
+                if (!phoneSnapshot.empty) {
+                    throw new Error('Phone number already registered');
+                }
+
                 const email = phone + '@coinflow.app';
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                
+                const user = userCredential.user;
+
                 // Create user document
-                await db.collection('users').doc(userCredential.user.uid).set({
+                await db.collection('users').doc(user.uid).set({
                     username,
                     userId,
                     phone,
                     email,
+                    referralCode: generateReferralCode(),
                     coins: 0,
                     balance: 0,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    totalEarned: 0,
+                    todayEarned: 0,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastActive: firebase.firestore.FieldValue.serverTimestamp(),
+                    checkInStreak: 0,
+                    spinsRemaining: 2,
+                    totalReferrals: 0,
+                    activeReferrals: 0,
+                    referralEarnings: 0,
+                    completedTasks: 0,
+                    isBlocked: false,
+                    role: 'user'
                 });
+
+                // Handle invite code
+                if (inviteCode) {
+                    const referrerSnapshot = await db.collection('users').where('referralCode', '==', inviteCode).get();
+                    if (!referrerSnapshot.empty) {
+                        const referrerDoc = referrerSnapshot.docs[0];
+                        
+                        // Update referrer
+                        await db.collection('users').doc(referrerDoc.id).update({
+                            coins: firebase.firestore.FieldValue.increment(50),
+                            totalReferrals: firebase.firestore.FieldValue.increment(1),
+                            referralEarnings: firebase.firestore.FieldValue.increment(50)
+                        });
+
+                        // Add transaction
+                        await db.collection('transactions').add({
+                            userId: referrerDoc.id,
+                            type: 'referral_bonus',
+                            amount: 50,
+                            description: `New user joined: ${username}`,
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                }
 
                 showToast('Account created successfully!');
                 toggleForms('login');
@@ -1069,18 +1581,112 @@
             }
         };
 
-        // ============= NAVIGATION =============
-        window.switchTab = function(tab) {
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+        // ============= EARNING FUNCTIONS =============
+        async function addCoins(amount, type, description) {
+            if (!currentUser) return;
 
-            document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
-            document.getElementById(tab + 'Section').classList.add('active');
+            try {
+                const userRef = db.collection('users').doc(currentUser.uid);
+                
+                await userRef.update({
+                    coins: firebase.firestore.FieldValue.increment(amount),
+                    balance: firebase.firestore.FieldValue.increment(amount / 20),
+                    todayEarned: firebase.firestore.FieldValue.increment(amount / 20),
+                    totalEarned: firebase.firestore.FieldValue.increment(amount / 20)
+                });
+
+                await db.collection('transactions').add({
+                    userId: currentUser.uid,
+                    type,
+                    amount,
+                    description,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Update local data
+                if (userData) {
+                    userData.coins = (userData.coins || 0) + amount;
+                    userData.balance = (userData.balance || 0) + (amount / 20);
+                    userData.todayEarned = (userData.todayEarned || 0) + (amount / 20);
+                    userData.totalEarned = (userData.totalEarned || 0) + (amount / 20);
+                    updateUI();
+                }
+
+            } catch (error) {
+                console.error('Error adding coins:', error);
+            }
+        }
+
+        window.handleCheckIn = async function() {
+            if (!currentUser) {
+                showToast('Please login first', 'error');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const today = new Date();
+                const lastCheckIn = userData?.lastCheckIn?.toDate();
+
+                if (lastCheckIn && lastCheckIn.toDateString() === today.toDateString()) {
+                    throw new Error('Already checked in today');
+                }
+
+                let streak = userData?.checkInStreak || 0;
+                if (lastCheckIn) {
+                    const yesterday = new Date(today);
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    streak = lastCheckIn.toDateString() === yesterday.toDateString() ? streak + 1 : 1;
+                } else {
+                    streak = 1;
+                }
+
+                const reward = earningRates?.checkinRewards?.[`day${Math.min(streak, 7)}`] || (streak === 7 ? 20 : 10);
+
+                await db.collection('users').doc(currentUser.uid).update({
+                    coins: firebase.firestore.FieldValue.increment(reward),
+                    balance: firebase.firestore.FieldValue.increment(reward / 20),
+                    todayEarned: firebase.firestore.FieldValue.increment(reward / 20),
+                    totalEarned: firebase.firestore.FieldValue.increment(reward / 20),
+                    checkInStreak: streak === 7 ? 0 : streak,
+                    lastCheckIn: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                await db.collection('transactions').add({
+                    userId: currentUser.uid,
+                    type: 'checkin',
+                    amount: reward,
+                    description: `Day ${streak} check-in`,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                showToast(`+${reward} coins for check-in!`);
+                loadUserData(currentUser.uid);
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                hideLoading();
+            }
         };
 
-        // ============= CHECK-IN =============
-        window.handleCheckIn = function() {
-            showToast('+10 coins for check-in!');
+        window.handleWatchAd = function() {
+            if (!currentUser) {
+                showToast('Please login first', 'error');
+                return;
+            }
+
+            showLoading();
+            setTimeout(async () => {
+                const min = earningRates?.videoRewards?.min || 5;
+                const max = earningRates?.videoRewards?.max || 10;
+                const reward = Math.floor(Math.random() * (max - min + 1)) + min;
+                
+                await addCoins(reward, 'ad_watch', 'Watched ad');
+                showToast(`+${reward} coins from ad!`);
+                hideLoading();
+            }, 3000);
         };
 
         // ============= SPIN WHEEL =============
@@ -1089,6 +1695,12 @@
                 showToast('Please login first', 'error');
                 return;
             }
+
+            if (userData?.spinsRemaining <= 0) {
+                showToast('No spins left today!', 'error');
+                return;
+            }
+
             document.getElementById('wheelModal').style.display = 'flex';
             drawWheel();
         };
@@ -1100,7 +1712,7 @@
         function drawWheel() {
             const canvas = document.getElementById('wheelCanvas');
             const ctx = canvas.getContext('2d');
-            const segments = [5, 10, 15, 20, 10, 5];
+            const segments = earningRates?.spinRewards || [5, 10, 15, 20, 10, 5];
             const colors = ['#FF6B4A', '#FF8E6A', '#FFA07A', '#FFB694', '#FFCCAA', '#FFE0C0'];
             
             const angle = (Math.PI * 2) / segments.length;
@@ -1125,33 +1737,151 @@
             }
         }
 
-        window.spinWheel = function() {
-            if (spinsLeft <= 0) {
+        window.spinWheel = async function() {
+            if (userData?.spinsRemaining <= 0) {
                 showToast('No spins left!', 'error');
                 closeSpinWheel();
                 return;
             }
 
-            spinsLeft--;
-            const reward = [5, 10, 15, 20, 10, 5][Math.floor(Math.random() * 6)];
-            document.getElementById('spinsLeft').textContent = spinsLeft + ' Spins Left';
-            showToast('🎉 You won ' + reward + ' coins!');
-            closeSpinWheel();
+            showLoading();
+
+            setTimeout(async () => {
+                const segments = earningRates?.spinRewards || [5, 10, 15, 20, 10, 5];
+                const reward = segments[Math.floor(Math.random() * segments.length)];
+
+                await db.collection('users').doc(currentUser.uid).update({
+                    coins: firebase.firestore.FieldValue.increment(reward),
+                    balance: firebase.firestore.FieldValue.increment(reward / 20),
+                    todayEarned: firebase.firestore.FieldValue.increment(reward / 20),
+                    totalEarned: firebase.firestore.FieldValue.increment(reward / 20),
+                    spinsRemaining: firebase.firestore.FieldValue.increment(-1)
+                });
+
+                await db.collection('transactions').add({
+                    userId: currentUser.uid,
+                    type: 'spin_wheel',
+                    amount: reward,
+                    description: 'Spin wheel reward',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                showToast(`🎉 You won ${reward} coins!`);
+                closeSpinWheel();
+                loadUserData(currentUser.uid);
+                hideLoading();
+            }, 2000);
         };
 
-        // ============= WATCH AD =============
-        window.handleWatchAd = function() {
+        // ============= WITHDRAWAL =============
+        window.handleWithdrawal = async function() {
             if (!currentUser) {
                 showToast('Please login first', 'error');
                 return;
             }
-            showToast('Ad watched! +5 coins');
+
+            const method = document.getElementById('withdrawMethod').value;
+            const account = document.getElementById('withdrawAccount').value.trim();
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+
+            if (!method || !account || !amount) {
+                showToast('Please fill all fields', 'error');
+                return;
+            }
+
+            if (amount < (withdrawalSettings?.minAmount || 50)) {
+                showToast(`Minimum withdrawal is ৳${withdrawalSettings?.minAmount || 50}`, 'error');
+                return;
+            }
+
+            if (amount > (withdrawalSettings?.maxAmount || 10000)) {
+                showToast(`Maximum withdrawal is ৳${withdrawalSettings?.maxAmount || 10000}`, 'error');
+                return;
+            }
+
+            if (userData.balance < amount) {
+                showToast('Insufficient balance', 'error');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                await db.collection('withdrawals').add({
+                    userId: currentUser.uid,
+                    username: userData.username,
+                    method,
+                    account,
+                    amount,
+                    status: 'pending',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                await db.collection('users').doc(currentUser.uid).update({
+                    balance: firebase.firestore.FieldValue.increment(-amount)
+                });
+
+                await db.collection('transactions').add({
+                    userId: currentUser.uid,
+                    type: 'withdrawal',
+                    amount,
+                    description: `Withdrawal via ${method}`,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                showToast('Withdrawal request submitted!');
+                document.getElementById('withdrawAccount').value = '';
+                document.getElementById('withdrawAmount').value = '';
+                loadUserData(currentUser.uid);
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                hideLoading();
+            }
         };
 
-        // ============= WITHDRAWAL =============
-        window.handleWithdrawal = function() {
-            showToast('Withdrawal request submitted!');
-        };
+        // ============= TRANSACTIONS =============
+        async function loadTransactions() {
+            if (!currentUser) return;
+
+            try {
+                const snapshot = await db.collection('transactions')
+                    .where('userId', '==', currentUser.uid)
+                    .orderBy('timestamp', 'desc')
+                    .limit(10)
+                    .get();
+
+                const historyDiv = document.getElementById('transactionHistory');
+                
+                if (snapshot.empty) {
+                    historyDiv.innerHTML = '<p style="color: var(--gray); text-align: center; padding: 20px;">No transactions yet</p>';
+                    return;
+                }
+
+                historyDiv.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const date = data.timestamp?.toDate() || new Date();
+                    const isCredit = data.type !== 'withdrawal';
+                    
+                    historyDiv.innerHTML += `
+                        <div class="transaction-item">
+                            <div>
+                                <p style="font-weight: 600; color: var(--dark);">${data.description || data.type}</p>
+                                <small style="color: var(--gray);">${date.toLocaleDateString()}</small>
+                            </div>
+                            <div class="transaction-amount ${isCredit ? 'positive' : 'negative'}">
+                                ${isCredit ? '+' : '-'}${data.amount} ${isCredit ? 'coins' : '৳'}
+                            </div>
+                        </div>
+                    `;
+                });
+
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+            }
+        }
 
         // ============= REFERRAL =============
         window.copyReferralCode = function() {
@@ -1173,38 +1903,147 @@
             }
         };
 
+        async function loadReferrals() {
+            if (!currentUser) return;
+
+            try {
+                const snapshot = await db.collection('users')
+                    .where('referredBy', '==', currentUser.uid)
+                    .orderBy('createdAt', 'desc')
+                    .limit(5)
+                    .get();
+
+                const invitesDiv = document.getElementById('recentInvites');
+                
+                if (snapshot.empty) {
+                    invitesDiv.innerHTML = '<p style="color: var(--gray); text-align: center;">No invites yet</p>';
+                    return;
+                }
+
+                invitesDiv.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const date = data.createdAt?.toDate() || new Date();
+                    
+                    invitesDiv.innerHTML += `
+                        <div style="display: flex; align-items: center; padding: 12px; background: #F8FAFC; border-radius: 12px; margin-bottom: 8px;">
+                            <div style="width: 40px; height: 40px; background: var(--gradient); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                                <i class="fas fa-user" style="color: white;"></i>
+                            </div>
+                            <div>
+                                <p style="font-weight: 600; color: var(--dark);">${data.username || 'User'}</p>
+                                <small style="color: var(--gray);">Joined ${date.toLocaleDateString()}</small>
+                            </div>
+                            <div style="margin-left: auto; color: var(--primary);">+50</div>
+                        </div>
+                    `;
+                });
+
+            } catch (error) {
+                console.error('Error loading referrals:', error);
+            }
+        }
+
+        // ============= NAVIGATION =============
+        window.switchTab = function(tab) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+            document.getElementById(tab + 'Section').classList.add('active');
+
+            // Load tab data
+            if (tab === 'home') loadReels();
+            if (tab === 'wallet') loadTransactions();
+            if (tab === 'invite' && currentUser) {
+                loadReferrals();
+                document.getElementById('referralCodeDisplay').textContent = userData?.referralCode || 'N/A';
+                document.getElementById('totalReferrals').textContent = userData?.totalReferrals || 0;
+                document.getElementById('activeReferrals').textContent = userData?.activeReferrals || 0;
+                document.getElementById('referralEarnings').textContent = userData?.referralEarnings || 0;
+            }
+        };
+
+        // ============= LOAD USER DATA =============
+        async function loadUserData(uid) {
+            try {
+                const doc = await db.collection('users').doc(uid).get();
+                if (doc.exists) {
+                    userData = doc.data();
+                    updateUI();
+                    
+                    // Check if user is admin
+                    if (userData.role === 'admin' || userData.role === 'super_admin') {
+                        document.getElementById('profileHeader').innerHTML += `
+                            <span class="admin-badge">
+                                <i class="fas fa-crown"></i> Admin
+                            </span>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        function updateUI() {
+            if (!userData) return;
+
+            document.getElementById('walletBalance').textContent = `৳ ${(userData.balance || 0).toFixed(2)}`;
+            document.getElementById('totalCoins').textContent = userData.coins || 0;
+            document.getElementById('todayEarnings').textContent = `৳ ${(userData.todayEarned || 0).toFixed(2)}`;
+            document.getElementById('profileUsername').textContent = userData.username || 'User';
+            document.getElementById('profileUserId').textContent = '@' + (userData.userId || 'user');
+            document.getElementById('profilePhone').textContent = userData.phone || 'Not set';
+            document.getElementById('spinsLeft').textContent = (userData.spinsRemaining || 0) + ' Spins Left';
+            document.getElementById('currentStreak').textContent = userData.checkInStreak || 0;
+
+            // Update check-in days
+            const checkinDays = document.getElementById('checkinDays');
+            checkinDays.innerHTML = '';
+            for (let i = 1; i <= 7; i++) {
+                const day = document.createElement('div');
+                day.className = `checkin-day ${i <= (userData.checkInStreak || 0) ? 'active' : ''}`;
+                day.innerHTML = `Day ${i}<br>${i === 7 ? '20' : '10'}`;
+                checkinDays.appendChild(day);
+            }
+
+            // Update check-in button
+            const checkinBtn = document.getElementById('checkinBtn');
+            const lastCheckIn = userData.lastCheckIn?.toDate();
+            const today = new Date();
+            
+            if (lastCheckIn && lastCheckIn.toDateString() === today.toDateString()) {
+                checkinBtn.disabled = true;
+                checkinBtn.style.opacity = '0.5';
+                checkinBtn.textContent = 'Checked In';
+            } else {
+                checkinBtn.disabled = false;
+                checkinBtn.style.opacity = '1';
+                checkinBtn.innerHTML = 'Check In';
+            }
+
+            // Update earning rates
+            updateEarningUI();
+        }
+
         // ============= AUTH STATE OBSERVER =============
-        auth.onAuthStateChanged((user) => {
+        auth.onAuthStateChanged(async (user) => {
             if (user) {
                 currentUser = user;
-                console.log('User logged in:', user);
+                await loadUserData(user.uid);
                 
                 document.getElementById('authScreen').classList.remove('active');
                 document.getElementById('mainScreen').style.display = 'block';
                 
-                // Load user data
-                db.collection('users').doc(user.uid).get().then(doc => {
-                    if (doc.exists) {
-                        userData = doc.data();
-                        document.getElementById('profileUsername').textContent = userData.username || 'User';
-                        document.getElementById('profileUserId').textContent = '@' + (userData.userId || 'user');
-                        document.getElementById('walletBalance').textContent = '৳ ' + (userData.balance || 0).toFixed(2);
-                        document.getElementById('totalCoins').textContent = userData.coins || 0;
-                        document.getElementById('referralCodeDisplay').textContent = userData.referralCode || 'N/A';
-                        
-                        // Update check-in days
-                        const checkinDays = document.getElementById('checkinDays');
-                        checkinDays.innerHTML = '';
-                        for (let i = 1; i <= 7; i++) {
-                            checkinDays.innerHTML += `<div class="checkin-day">Day ${i}<br>${i===7?'20':'10'}</div>`;
-                        }
-                    }
-                });
+                // Load data
+                loadReels();
+                loadTasks();
+                loadTransactions();
                 
             } else {
                 currentUser = null;
                 userData = null;
-                console.log('User logged out');
                 
                 document.getElementById('authScreen').classList.add('active');
                 document.getElementById('mainScreen').style.display = 'none';
@@ -1225,27 +2064,16 @@
             document.getElementById('splashScreen').style.display = 'none';
         }, 2000);
 
-        // Load sample videos
-        const reelsContainer = document.getElementById('reelsContainer');
-        reelsContainer.innerHTML = `
-            <div class="reel-item">
-                <video class="reel-video" loop autoplay muted playsinline>
-                    <source src="https://assets.mixkit.co/videos/preview/mixkit-woman-using-a-mobile-phone-42794-large.mp4" type="video/mp4">
-                </video>
-                <div class="reel-overlay">
-                    <div class="reel-user">
-                        <div class="reel-avatar">C</div>
-                        <div>
-                            <h4>@cooking_master</h4>
-                            <p>Amazing pasta recipe! 🍝</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="reel-timer">
-                    <i class="fas fa-clock"></i> Watch to earn
-                </div>
-            </div>
-        `;
+        // Load app settings
+        loadAppSettings();
+
+        // Initialize check-in days
+        const checkinDays = document.getElementById('checkinDays');
+        for (let i = 1; i <= 7; i++) {
+            checkinDays.innerHTML += `<div class="checkin-day">Day ${i}<br>${i===7?'20':'10'}</div>`;
+        }
+
+        console.log('✅ CoinFlow initialized - Admin Controlled');
     </script>
 </body>
 </html>
