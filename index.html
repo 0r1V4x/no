@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CoinFlow • Earn Real Money</title>
+    
+    <!-- PWA Support -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#FF6B4A">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="app-container" id="app" role="main" aria-label="CoinFlow Application">
+        <!-- Splash Screen -->
+        <div class="splash-screen" id="splashScreen" role="presentation" aria-label="Loading">
+            <div class="splash-content">
+                <i class="fas fa-bolt splash-logo" aria-hidden="true"></i>
+                <h1 class="splash-title">CoinFlow</h1>
+                <p class="splash-sub">EARN • WATCH • REPEAT</p>
+            </div>
+        </div>
+
+        <!-- Auth Screen -->
+        <div id="authScreen" class="auth-screen active" role="region" aria-label="Authentication">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h2 class="auth-title">Welcome to CoinFlow</h2>
+                <p class="auth-subtitle">Start earning real money today</p>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginForm">
+                <div class="form-group">
+                    <i class="fas fa-phone-alt"></i>
+                    <input type="tel" class="form-control" id="loginPhone" placeholder="Phone number" maxlength="11" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" class="form-control" id="loginPassword" placeholder="Password" autocomplete="off">
+                </div>
+                <button class="btn btn-primary" data-action="login">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Login
+                </button>
+                <p style="text-align: center; margin: 24px 0; color: var(--gray);">
+                    Don't have an account? 
+                    <a href="#" data-toggle-auth="signup" style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign Up</a>
+                </p>
+            </div>
+
+            <!-- Signup Form -->
+            <div id="signupForm" style="display: none;">
+                <div class="form-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" class="form-control" id="signupUsername" placeholder="Username" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <i class="fas fa-id-card"></i>
+                    <input type="text" class="form-control" id="signupUserId" placeholder="User ID (unique)" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <i class="fas fa-phone-alt"></i>
+                    <input type="tel" class="form-control" id="signupPhone" placeholder="11 digit phone number" maxlength="11" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" class="form-control" id="signupPassword" placeholder="Password (min 8 chars, letter + number + special)" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <i class="fas fa-gift"></i>
+                    <input type="text" class="form-control" id="inviteCode" placeholder="Invite code (optional)" autocomplete="off">
+                </div>
+                <button class="btn btn-primary" data-action="signup">
+                    <i class="fas fa-user-plus"></i>
+                    Create Account
+                </button>
+                <p style="text-align: center; margin: 24px 0; color: var(--gray);">
+                    Already have an account? 
+                    <a href="#" data-toggle-auth="login" style="color: var(--primary); text-decoration: none; font-weight: 600;">Login</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Main App Screen -->
+        <div id="mainScreen" class="main-screen" style="display: none;" role="region" aria-label="Main Application">
+            <!-- Bottom Navigation -->
+            <div class="bottom-nav">
+                <div class="nav-item active" data-tab="home">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </div>
+                <div class="nav-item" data-tab="earn">
+                    <i class="fas fa-tasks"></i>
+                    <span>Earn</span>
+                </div>
+                <div class="nav-item" data-tab="wallet">
+                    <i class="fas fa-wallet"></i>
+                    <span>Wallet</span>
+                </div>
+                <div class="nav-item" data-tab="invite">
+                    <i class="fas fa-users"></i>
+                    <span>Invite</span>
+                </div>
+                <div class="nav-item" data-tab="profile">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </div>
+            </div>
+
+            <!-- Home Section - Reels -->
+            <div id="homeSection" class="content-section active">
+                <div class="reels-container" id="reelsContainer">
+                    <!-- Reels will be loaded dynamically from Firebase -->
+                </div>
+            </div>
+
+            <!-- Earn Section -->
+            <div id="earnSection" class="content-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="color: var(--dark); font-size: 24px; font-weight: 800;">Earn Coins</h2>
+                    <span class="level-badge" style="background: var(--gradient); color: white; padding: 8px 16px; border-radius: 30px; font-size: 14px; font-weight: 600;">
+                        <i class="fas fa-star"></i> Level 1
+                    </span>
+                </div>
+                
+                <!-- Daily Check-in -->
+                <div class="checkin-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3 style="font-size: 20px; margin-bottom: 8px;">Daily Check-in</h3>
+                            <p style="opacity: 0.9;">Day <span id="currentStreak">1</span> • +<span id="checkinReward">10</span> coins</p>
+                        </div>
+                        <button class="btn btn-outline" data-action="checkin" style="width: auto; padding: 12px 24px; background: white; color: var(--primary); border: none;">
+                            Check In
+                        </button>
+                    </div>
+                    <div class="checkin-days" id="checkinDays">
+                        <!-- Dynamic check-in days -->
+                    </div>
+                </div>
+
+                <!-- Tasks Container (from admin) -->
+                <div id="tasksContainer" class="task-grid">
+                    <!-- Tasks loaded dynamically from admin -->
+                </div>
+
+                <div class="earn-grid">
+                    <!-- Watch Ads -->
+                    <div class="earn-card" data-action="watch-ad">
+                        <div class="earn-icon">
+                            <i class="fas fa-play"></i>
+                        </div>
+                        <h3 style="color: var(--dark);">Watch Ads</h3>
+                        <div class="earn-reward" id="videoReward">5-10 Coins</div>
+                        <button class="btn btn-primary" style="margin-top: 16px; padding: 12px;">Watch Now</button>
+                    </div>
+
+                    <!-- Spin Wheel -->
+                    <div class="earn-card" data-action="open-spin">
+                        <div class="earn-icon">
+                            <i class="fas fa-circle-notch"></i>
+                        </div>
+                        <h3 style="color: var(--dark);">Spin Wheel</h3>
+                        <div class="earn-reward" id="spinsLeft">2 Spins Left</div>
+                        <button class="btn btn-primary" style="margin-top: 16px; padding: 12px;">Spin</button>
+                    </div>
+                </div>
+
+                <!-- Spin Wheel Modal -->
+                <div id="wheelModal" style="display: none;">
+                    <div class="wheel-container">
+                        <h3 style="color: var(--dark); font-size: 24px; margin-bottom: 24px;">Spin & Win!</h3>
+                        <div style="position: relative; width: 250px; height: 250px; margin: 0 auto;">
+                            <canvas id="wheelCanvas" width="250" height="250"></canvas>
+                        </div>
+                        <button class="btn btn-primary" data-action="spin-wheel" style="margin-top: 24px;">
+                            <i class="fas fa-play"></i> SPIN (Watch Ad)
+                        </button>
+                        <button class="btn btn-outline" data-action="close-spin" style="margin-top: 12px;">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wallet Section -->
+            <div id="walletSection" class="content-section">
+                <h2 style="color: var(--dark); font-size: 24px; font-weight: 800; margin-bottom: 20px;">My Wallet</h2>
+                
+                <div class="wallet-card">
+                    <p style="opacity: 0.9;">Total Balance</p>
+                    <div class="wallet-balance" id="walletBalance">৳ 0.00</div>
+                    <div class="wallet-stats">
+                        <div>
+                            <p style="opacity: 0.9; font-size: 13px;">Total Coins</p>
+                            <h3 style="font-size: 24px;" id="totalCoins">0</h3>
+                        </div>
+                        <div>
+                            <p style="opacity: 0.9; font-size: 13px;">Today's Earn</p>
+                            <h3 style="font-size: 24px;" id="todayEarnings">৳ 0.00</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: white; padding: 24px; border-radius: 24px; box-shadow: var(--shadow-sm);">
+                    <h3 style="color: var(--dark); margin-bottom: 20px;">Withdraw Earnings</h3>
+                    
+                    <div style="background: #F8FAFC; padding: 16px; border-radius: 16px; margin-bottom: 24px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: var(--gray);">Min. Withdrawal</span>
+                            <span style="font-weight: 700; color: var(--primary);" id="minWithdrawal">৳ 50</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--gray);">Max. Withdrawal</span>
+                            <span style="font-weight: 700; color: var(--primary);" id="maxWithdrawal">৳ 10000</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                            <span style="color: var(--gray);">Processing Time</span>
+                            <span style="font-weight: 700; color: var(--primary);" id="processingTime">24-48 hours</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <i class="fas fa-university"></i>
+                        <select class="form-control" id="withdrawMethod" style="padding-left: 45px;">
+                            <option value="">Select Payment Method</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" class="form-control" id="withdrawAccount" placeholder="Account Number">
+                    </div>
+                    
+                    <div class="form-group">
+                        <i class="fas fa-money-bill"></i>
+                        <input type="number" class="form-control" id="withdrawAmount" placeholder="Amount">
+                    </div>
+                    
+                    <button class="btn btn-primary" data-action="withdraw">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        Request Withdrawal
+                    </button>
+                    
+                    <div style="margin-top: 30px;">
+                        <h4 style="color: var(--dark); margin-bottom: 16px;">Recent Transactions</h4>
+                        <div id="transactionHistory">
+                            <!-- Dynamic transaction history -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invite Section -->
+            <div id="inviteSection" class="content-section">
+                <div class="invite-card">
+                    <i class="fas fa-gift" style="font-size: 48px; margin-bottom: 16px;"></i>
+                    <h2 style="font-size: 28px; margin-bottom: 12px;">Invite Friends</h2>
+                    <p style="margin-bottom: 8px;">Get <span style="font-weight: 800; font-size: 20px;" id="referralBonus">50 coins</span> per invite</p>
+                    <p style="opacity: 0.9; margin-bottom: 24px;">+5 coins/day for 10 days when active</p>
+                    
+                    <div class="referral-box" id="referralCodeDisplay">
+                        LOADING...
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-outline" data-action="copy-referral" style="flex: 1; background: white;">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                        <button class="btn btn-outline" data-action="share-referral" style="flex: 1; background: white;">
+                            <i class="fas fa-share"></i> Share
+                        </button>
+                    </div>
+                </div>
+
+                <div style="background: white; padding: 24px; border-radius: 24px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                        <div style="text-align: center;">
+                            <h3 style="color: var(--primary); font-size: 28px;" id="totalReferrals">0</h3>
+                            <span style="color: var(--gray); font-size: 12px;">Total</span>
+                        </div>
+                        <div style="text-align: center;">
+                            <h3 style="color: var(--accent); font-size: 28px;" id="activeReferrals">0</h3>
+                            <span style="color: var(--gray); font-size: 12px;">Active</span>
+                        </div>
+                        <div style="text-align: center;">
+                            <h3 style="color: #FFD700; font-size: 28px;" id="referralEarnings">0</h3>
+                            <span style="color: var(--gray); font-size: 12px;">Earned</span>
+                        </div>
+                    </div>
+                    
+                    <h4 style="color: var(--dark); margin-bottom: 16px;">Recent Invites</h4>
+                    <div id="recentInvites">
+                        <!-- Dynamic invites list -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <div id="profileSection" class="content-section">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 24px; margin-bottom: 4px;" id="profileUsername">Loading...</h3>
+                        <p style="opacity: 0.9;" id="profileUserId">@loading</p>
+                        <p style="opacity: 0.9; font-size: 13px; margin-top: 4px;" id="profilePhone">
+                            <i class="fas fa-phone"></i> Loading...
+                        </p>
+                    </div>
+                </div>
+
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="profileTotalEarnings">৳0</div>
+                        <div class="stat-label">Total Earned</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="profileDailyEarnings">৳0</div>
+                        <div class="stat-label">Today</div>
+                    </div>
+                </div>
+
+                <div style="background: white; border-radius: 24px; padding: 24px;">
+                    <div style="display: flex; align-items: center; padding: 16px; background: #F8FAFC; border-radius: 16px; margin-bottom: 12px; cursor: pointer;" data-action="edit-profile">
+                        <i class="fas fa-user-edit" style="color: var(--primary); margin-right: 16px; font-size: 20px;"></i>
+                        <span style="color: var(--dark); font-weight: 600;">Edit Profile</span>
+                        <i class="fas fa-chevron-right" style="margin-left: auto; color: var(--gray);"></i>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; padding: 16px; background: #F8FAFC; border-radius: 16px; margin-bottom: 12px; cursor: pointer;" data-support="facebook">
+                        <i class="fab fa-facebook" style="color: #1877F2; margin-right: 16px; font-size: 20px;"></i>
+                        <span style="color: var(--dark); font-weight: 600;">Facebook Group</span>
+                        <i class="fas fa-chevron-right" style="margin-left: auto; color: var(--gray);"></i>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; padding: 16px; background: #F8FAFC; border-radius: 16px; margin-bottom: 12px; cursor: pointer;" data-support="telegram">
+                        <i class="fab fa-telegram" style="color: #26A5E4; margin-right: 16px; font-size: 20px;"></i>
+                        <span style="color: var(--dark); font-weight: 600;">Telegram Group</span>
+                        <i class="fas fa-chevron-right" style="margin-left: auto; color: var(--gray);"></i>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; padding: 16px; background: #F8FAFC; border-radius: 16px; margin-bottom: 12px; cursor: pointer;" data-action="contact-admin">
+                        <i class="fas fa-headset" style="color: var(--accent); margin-right: 16px; font-size: 20px;"></i>
+                        <span style="color: var(--dark); font-weight: 600;">Admin Contact</span>
+                        <i class="fas fa-chevron-right" style="margin-left: auto; color: var(--gray);"></i>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; padding: 16px; background: #FEF2F2; border-radius: 16px; cursor: pointer;" data-action="logout">
+                        <i class="fas fa-sign-out-alt" style="color: #EF4444; margin-right: 16px; font-size: 20px;"></i>
+                        <span style="color: #EF4444; font-weight: 600;">Logout</span>
+                        <i class="fas fa-chevron-right" style="margin-left: auto; color: #EF4444;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+        
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay" style="display: none;" role="progressbar" aria-label="Loading">
+            <div class="spinner"></div>
+        </div>
+        
+        <!-- Offline Indicator -->
+        <div id="offlineIndicator" class="offline-indicator" style="display: none;" role="status">
+            <i class="fas fa-wifi-slash" aria-hidden="true"></i>
+            You are offline
+        </div>
+    </div>
+
+    <!-- Main JavaScript (ES Module) -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
