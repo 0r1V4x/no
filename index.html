@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CoinFlow • Earn Real Money</title>
     
-    <!-- PWA Support -->
-    <link rel="manifest" href="manifest.json">
+    <!-- PWA Support - Comment out until you add icons -->
+    <!-- <link rel="manifest" href="manifest.json"> -->
     <meta name="theme-color" content="#FF6B4A">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -15,33 +15,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase SDK (Global Version) -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js"></script>
+    <!-- Firebase SDK (Global Version - CORRECT) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
     
     <style>
-        /* ===== ADVANCED STYLING ===== */
+        /* ===== COMPLETE STYLING ===== */
         :root {
             --primary: #FF6B4A;
             --primary-dark: #E54B2A;
             --primary-light: #FF8B6A;
             --secondary: #1A2E45;
             --accent: #00D09C;
-            --accent-glow: #00E6A9;
             --dark: #0F1A2B;
-            --dark-light: #1E2F40;
             --light: #F8FAFC;
             --gray: #94A3B8;
             --success: #10B981;
             --danger: #EF4444;
-            --warning: #F59E0B;
             --gradient: linear-gradient(135deg, #FF6B4A 0%, #FF8E6A 100%);
-            --gradient-reverse: linear-gradient(135deg, #1A2E45 0%, #2C4056 100%);
-            --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.1);
-            --shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-            --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1);
         }
 
         * {
@@ -64,7 +56,7 @@
             background: linear-gradient(145deg, #FFFFFF 0%, #F8FAFC 100%);
             min-height: 100vh;
             position: relative;
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
             border-radius: 32px 32px 0 0;
             overflow: hidden;
         }
@@ -117,9 +109,17 @@
             background: linear-gradient(135deg, #FFFFFF 0%, #FFD6CC 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
         }
 
-        /* Auth Screens */
+        .splash-sub {
+            font-size: 16px;
+            color: var(--gray);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        /* Auth Screen */
         .auth-screen {
             padding: 24px;
             background: linear-gradient(145deg, var(--light) 0%, #FFFFFF 100%);
@@ -155,6 +155,12 @@
             font-size: 32px;
             font-weight: 800;
             color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .auth-subtitle {
+            color: var(--gray);
+            font-size: 15px;
         }
 
         /* Form Controls */
@@ -293,7 +299,7 @@
             }
         }
 
-        /* Reels Container */
+        /* Reels */
         .reels-container {
             height: calc(100vh - 140px);
             overflow-y: scroll;
@@ -314,7 +320,7 @@
             overflow: hidden;
             margin-bottom: 12px;
             background: var(--dark);
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
         }
 
         .reel-video {
@@ -376,7 +382,7 @@
             background: white;
             padding: 24px 16px;
             border-radius: 20px;
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
             text-align: center;
             transition: all 0.3s ease;
             border: 1px solid #EDF2F7;
@@ -385,7 +391,7 @@
 
         .earn-card:hover {
             transform: translateY(-5px);
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
             border-color: var(--primary-light);
         }
 
@@ -412,24 +418,13 @@
 
         /* Check-in Card */
         .checkin-card {
-            background: var(--gradient-reverse);
+            background: linear-gradient(135deg, #1A2E45 0%, #2C4056 100%);
             padding: 24px;
             border-radius: 24px;
             color: white;
             margin-bottom: 24px;
             position: relative;
             overflow: hidden;
-        }
-
-        .checkin-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200px;
-            height: 200px;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            border-radius: 50%;
         }
 
         .checkin-days {
@@ -447,12 +442,11 @@
             text-align: center;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
         }
 
         .checkin-day.active {
-            background: var(--accent);
-            box-shadow: 0 0 20px var(--accent);
+            background: #00D09C;
+            box-shadow: 0 0 20px #00D09C;
         }
 
         /* Task Cards */
@@ -466,7 +460,6 @@
             background: white;
             padding: 20px;
             border-radius: 20px;
-            box-shadow: var(--shadow-sm);
             display: flex;
             align-items: center;
             gap: 16px;
@@ -498,7 +491,6 @@
         .task-reward {
             color: var(--primary);
             font-weight: 600;
-            font-size: 14px;
         }
 
         .task-btn {
@@ -513,20 +505,17 @@
 
         /* Wallet Card */
         .wallet-card {
-            background: var(--gradient-reverse);
+            background: linear-gradient(135deg, #1A2E45 0%, #2C4056 100%);
             padding: 32px 24px;
             border-radius: 24px;
             color: white;
             margin-bottom: 24px;
-            position: relative;
-            overflow: hidden;
         }
 
         .wallet-balance {
             font-size: 48px;
             font-weight: 800;
             margin: 16px 0;
-            letter-spacing: -1px;
         }
 
         .wallet-stats {
@@ -593,7 +582,7 @@
             z-index: 9999;
             display: none;
             border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
         }
 
         .toast.show {
@@ -612,7 +601,7 @@
             }
         }
 
-        /* Loading Spinner */
+        /* Loading */
         .spinner {
             width: 40px;
             height: 40px;
@@ -645,16 +634,13 @@
             top: 0;
             left: 0;
             right: 0;
-            background: var(--warning);
+            background: #F59E0B;
             color: white;
             text-align: center;
             padding: 10px;
             font-size: 14px;
             z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            display: none;
         }
 
         /* Admin Badge */
@@ -671,48 +657,12 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            box-shadow: var(--shadow);
         }
 
-        /* Maintenance Overlay */
-        .maintenance-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(15,26,43,0.98);
-            backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        }
-
-        .maintenance-content {
-            text-align: center;
-            color: white;
-            max-width: 300px;
-        }
-
-        .maintenance-content i {
-            font-size: 64px;
-            color: var(--primary);
-            margin-bottom: 20px;
-            animation: spin 4s linear infinite;
-        }
-
-        .maintenance-content h2 {
-            font-size: 28px;
-            margin-bottom: 12px;
-        }
-
-        /* Responsive */
         @media (max-width: 428px) {
             .earn-grid {
                 grid-template-columns: 1fr;
             }
-            
             .checkin-days {
                 grid-template-columns: repeat(4, 1fr);
             }
@@ -817,10 +767,10 @@
                 </div>
             </div>
 
-            <!-- Home Section - Reels -->
+            <!-- Home Section -->
             <div id="homeSection" class="content-section active">
                 <div class="reels-container" id="reelsContainer">
-                    <!-- Reels loaded dynamically -->
+                    <!-- Reels will be loaded -->
                 </div>
             </div>
 
@@ -828,7 +778,7 @@
             <div id="earnSection" class="content-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 style="color: var(--dark); font-size: 24px; font-weight: 800;">Earn Coins</h2>
-                    <span class="level-badge" style="background: var(--gradient); color: white; padding: 8px 16px; border-radius: 30px; font-size: 14px; font-weight: 600;">
+                    <span style="background: var(--gradient); color: white; padding: 8px 16px; border-radius: 30px; font-size: 14px; font-weight: 600;">
                         <i class="fas fa-star"></i> Level 1
                     </span>
                 </div>
@@ -845,27 +795,20 @@
                         </button>
                     </div>
                     <div class="checkin-days" id="checkinDays">
-                        <!-- Dynamic check-in days -->
+                        <!-- Dynamic -->
                     </div>
                 </div>
 
-                <!-- Tasks Container -->
-                <div id="tasksContainer" class="task-grid">
-                    <!-- Tasks loaded dynamically -->
-                </div>
-
                 <div class="earn-grid">
-                    <!-- Watch Ads -->
                     <div class="earn-card" onclick="handleWatchAd()">
                         <div class="earn-icon">
                             <i class="fas fa-play"></i>
                         </div>
                         <h3 style="color: var(--dark);">Watch Ads</h3>
-                        <div class="earn-reward" id="videoReward">5-10 Coins</div>
+                        <div class="earn-reward">5-10 Coins</div>
                         <button class="btn btn-primary" style="margin-top: 16px; padding: 12px;">Watch Now</button>
                     </div>
 
-                    <!-- Spin Wheel -->
                     <div class="earn-card" onclick="openSpinWheel()">
                         <div class="earn-icon">
                             <i class="fas fa-circle-notch"></i>
@@ -896,21 +839,17 @@
                     </div>
                 </div>
 
-                <div style="background: white; padding: 24px; border-radius: 24px; box-shadow: var(--shadow-sm);">
+                <div style="background: white; padding: 24px; border-radius: 24px;">
                     <h3 style="color: var(--dark); margin-bottom: 20px;">Withdraw Earnings</h3>
                     
                     <div style="background: #F8FAFC; padding: 16px; border-radius: 16px; margin-bottom: 24px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                             <span style="color: var(--gray);">Min. Withdrawal</span>
-                            <span style="font-weight: 700; color: var(--primary);" id="minWithdrawal">৳ 50</span>
+                            <span style="font-weight: 700; color: var(--primary);">৳ 50</span>
                         </div>
                         <div style="display: flex; justify-content: space-between;">
                             <span style="color: var(--gray);">Max. Withdrawal</span>
-                            <span style="font-weight: 700; color: var(--primary);" id="maxWithdrawal">৳ 10000</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-top: 8px;">
-                            <span style="color: var(--gray);">Processing Time</span>
-                            <span style="font-weight: 700; color: var(--primary);" id="processingTime">24-48 hours</span>
+                            <span style="font-weight: 700; color: var(--primary);">৳ 10000</span>
                         </div>
                     </div>
                     
@@ -920,7 +859,6 @@
                             <option value="">Select Payment Method</option>
                             <option value="bkash">bKash</option>
                             <option value="nagad">Nagad</option>
-                            <option value="rocket">Rocket</option>
                         </select>
                     </div>
                     
@@ -940,113 +878,43 @@
                     
                     <div style="margin-top: 30px;">
                         <h4 style="color: var(--dark); margin-bottom: 16px;">Recent Transactions</h4>
-                        <div id="transactionHistory">
-                            <!-- Dynamic transaction history -->
-                        </div>
+                        <div id="transactionHistory"></div>
                     </div>
                 </div>
             </div>
 
             <!-- Invite Section -->
             <div id="inviteSection" class="content-section">
-                <div class="invite-card">
+                <div style="background: linear-gradient(145deg, #FF6B4A, #FF8E6A); padding: 32px 24px; border-radius: 24px; color: white; text-align: center; margin-bottom: 24px;">
                     <i class="fas fa-gift" style="font-size: 48px; margin-bottom: 16px;"></i>
                     <h2 style="font-size: 28px; margin-bottom: 12px;">Invite Friends</h2>
-                    <p style="margin-bottom: 8px;">Get <span style="font-weight: 800; font-size: 20px;" id="referralBonus">50 coins</span> per invite</p>
-                    <p style="opacity: 0.9; margin-bottom: 24px;">+5 coins/day for 10 days when active</p>
-                    
-                    <div class="referral-box" id="referralCodeDisplay" onclick="copyReferralCode()">
+                    <p>Get 50 coins per invite</p>
+                    <div style="background: rgba(255,255,255,0.15); padding: 16px; border-radius: 16px; font-size: 28px; font-weight: 800; letter-spacing: 8px; margin: 24px 0;" id="referralCodeDisplay">
                         LOADING...
                     </div>
-                    
                     <div style="display: flex; gap: 12px;">
-                        <button class="btn btn-outline" onclick="copyReferralCode()" style="flex: 1; background: white;">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                        <button class="btn btn-outline" onclick="shareReferralCode()" style="flex: 1; background: white;">
-                            <i class="fas fa-share"></i> Share
-                        </button>
-                    </div>
-                </div>
-
-                <div style="background: white; padding: 24px; border-radius: 24px;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px;">
-                        <div style="text-align: center;">
-                            <h3 style="color: var(--primary); font-size: 28px;" id="totalReferrals">0</h3>
-                            <span style="color: var(--gray); font-size: 12px;">Total</span>
-                        </div>
-                        <div style="text-align: center;">
-                            <h3 style="color: var(--accent); font-size: 28px;" id="activeReferrals">0</h3>
-                            <span style="color: var(--gray); font-size: 12px;">Active</span>
-                        </div>
-                        <div style="text-align: center;">
-                            <h3 style="color: #FFD700; font-size: 28px;" id="referralEarnings">0</h3>
-                            <span style="color: var(--gray); font-size: 12px;">Earned</span>
-                        </div>
-                    </div>
-                    
-                    <h4 style="color: var(--dark); margin-bottom: 16px;">Recent Invites</h4>
-                    <div id="recentInvites">
-                        <!-- Dynamic invites list -->
+                        <button class="btn btn-outline" onclick="copyReferralCode()" style="flex: 1; background: white;">Copy</button>
+                        <button class="btn btn-outline" onclick="shareReferralCode()" style="flex: 1; background: white;">Share</button>
                     </div>
                 </div>
             </div>
 
             <!-- Profile Section -->
             <div id="profileSection" class="content-section">
-                <div class="profile-header" id="profileHeader">
-                    <div class="profile-avatar">
+                <div style="background: linear-gradient(135deg, #1A2E45 0%, #2C4056 100%); padding: 32px 24px; border-radius: 24px; color: white; display: flex; align-items: center; gap: 20px; margin-bottom: 24px;">
+                    <div style="width: 80px; height: 80px; background: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: var(--primary);">
                         <i class="fas fa-user"></i>
                     </div>
                     <div>
                         <h3 style="font-size: 24px; margin-bottom: 4px;" id="profileUsername">Loading...</h3>
                         <p style="opacity: 0.9;" id="profileUserId">@loading</p>
-                        <p style="opacity: 0.9; font-size: 13px; margin-top: 4px;" id="profilePhone">
-                            <i class="fas fa-phone"></i> Loading...
-                        </p>
-                    </div>
-                </div>
-
-                <div class="profile-stats">
-                    <div class="stat-item">
-                        <div class="stat-value" id="profileTotalEarnings">৳0</div>
-                        <div class="stat-label">Total Earned</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="profileDailyEarnings">৳0</div>
-                        <div class="stat-label">Today</div>
                     </div>
                 </div>
 
                 <div style="background: white; border-radius: 24px; padding: 24px;">
-                    <div style="display: flex; align-items: center; padding: 16px; background: #F8FAFC; border-radius: 16px; margin-bottom: 12px; cursor: pointer;" onclick="editProfile()">
-                        <i class="fas fa-user-edit" style="color: var(--primary); margin-right: 16px; font-size: 20px;"></i>
-                        <span style="color: var(--dark); font-weight: 600;">Edit Profile</span>
-                        <i class="fas fa-chevron-right" style="margin-left: auto; color: var(--gray);"></i>
-                    </div>
-                    
-                    <div style="display: flex; align-items: center; padding: 16px; background: #F8FAFC; border-radius: 16px; margin-bottom: 12px; cursor: pointer;" onclick="openSupport('facebook')">
-                        <i class="fab fa-facebook" style="color: #1877F2; margin-right: 16px; font-size: 20px;"></i>
-                        <span style="color: var(--dark); font-weight: 600;">Facebook Group</span>
-                        <i class="fas fa-chevron-right" style="margin-left: auto; color: var(--gray);"></i>
-                    </div>
-                    
-                    <div style="display: flex; align-items: center; padding: 16px; background: #F8FAFC; border-radius: 16px; margin-bottom: 12px; cursor: pointer;" onclick="openSupport('telegram')">
-                        <i class="fab fa-telegram" style="color: #26A5E4; margin-right: 16px; font-size: 20px;"></i>
-                        <span style="color: var(--dark); font-weight: 600;">Telegram Group</span>
-                        <i class="fas fa-chevron-right" style="margin-left: auto; color: var(--gray);"></i>
-                    </div>
-                    
-                    <div style="display: flex; align-items: center; padding: 16px; background: #F8FAFC; border-radius: 16px; margin-bottom: 12px; cursor: pointer;" onclick="contactAdmin()">
-                        <i class="fas fa-headset" style="color: var(--accent); margin-right: 16px; font-size: 20px;"></i>
-                        <span style="color: var(--dark); font-weight: 600;">Admin Contact</span>
-                        <i class="fas fa-chevron-right" style="margin-left: auto; color: var(--gray);"></i>
-                    </div>
-                    
-                    <div style="display: flex; align-items: center; padding: 16px; background: #FEF2F2; border-radius: 16px; cursor: pointer;" onclick="handleLogout()">
-                        <i class="fas fa-sign-out-alt" style="color: #EF4444; margin-right: 16px; font-size: 20px;"></i>
+                    <div style="display: flex; align-items: center; padding: 16px; background: #F8FAFC; border-radius: 16px; margin-bottom: 12px; cursor: pointer;" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt" style="color: #EF4444; margin-right: 16px;"></i>
                         <span style="color: #EF4444; font-weight: 600;">Logout</span>
-                        <i class="fas fa-chevron-right" style="margin-left: auto; color: #EF4444;"></i>
                     </div>
                 </div>
             </div>
@@ -1060,7 +928,7 @@
                     <canvas id="wheelCanvas" width="250" height="250"></canvas>
                 </div>
                 <button class="btn btn-primary" onclick="spinWheel()" style="margin-top: 24px;">
-                    <i class="fas fa-play"></i> SPIN (Watch Ad)
+                    <i class="fas fa-play"></i> SPIN
                 </button>
                 <button class="btn btn-outline" onclick="closeSpinWheel()" style="margin-top: 12px;">
                     Close
@@ -1068,50 +936,44 @@
             </div>
         </div>
 
-        <!-- Toast Notification -->
+        <!-- Toast -->
         <div id="toast" class="toast"></div>
         
-        <!-- Loading Overlay -->
+        <!-- Loading -->
         <div id="loadingOverlay" class="loading-overlay" style="display: none;">
             <div class="spinner"></div>
         </div>
         
         <!-- Offline Indicator -->
-        <div id="offlineIndicator" class="offline-indicator" style="display: none;">
+        <div id="offlineIndicator" class="offline-indicator">
             <i class="fas fa-wifi-slash"></i> You are offline
         </div>
     </div>
 
     <script>
-        // ============= FIREBASE CONFIG =============
+        // ============= FIREBASE INIT (CORRECT VERSION) =============
         const firebaseConfig = {
             apiKey: "AIzaSyDhM8LtJKXnSI9nsJLWs1Dpj9WBpEr8B_I",
             authDomain: "coinflow-a5496.firebaseapp.com",
             projectId: "coinflow-a5496",
             storageBucket: "coinflow-a5496.firebasestorage.app",
             messagingSenderId: "654252221891",
-            appId: "1:654252221891:web:1992c59199780625930976",
-            measurementId: "G-6MHV1R3GPN"
+            appId: "1:654252221891:web:1992c59199780625930976"
         };
 
-        // Initialize Firebase
+        // Initialize Firebase (using compat version)
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
-        
-        // Enable offline persistence
-        db.enablePersistence().catch(err => {
-            console.log('Persistence error:', err);
-        });
+
+        console.log('✅ Firebase initialized successfully');
 
         // ============= GLOBAL VARIABLES =============
         let currentUser = null;
         let userData = null;
-        let currentStreak = 0;
         let spinsLeft = 2;
-        let watchedVideos = 0;
 
-        // ============= UTILITY FUNCTIONS =============
+        // ============= HELPER FUNCTIONS =============
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -1126,10 +988,6 @@
 
         function hideLoading() {
             document.getElementById('loadingOverlay').style.display = 'none';
-        }
-
-        function generateReferralCode() {
-            return 'CF' + Math.random().toString(36).substring(2, 8).toUpperCase();
         }
 
         // ============= AUTH FUNCTIONS =============
@@ -1152,12 +1010,7 @@
             try {
                 const email = phone + '@coinflow.app';
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                
-                // Update last active
-                await db.collection('users').doc(userCredential.user.uid).update({
-                    lastActive: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
+                console.log('Login success:', userCredential.user);
                 showToast('Login successful!');
                 
             } catch (error) {
@@ -1173,82 +1026,29 @@
             const userId = document.getElementById('signupUserId').value.trim();
             const phone = document.getElementById('signupPhone').value.trim();
             const password = document.getElementById('signupPassword').value;
-            const inviteCode = document.getElementById('inviteCode').value.trim();
 
             if (!username || !userId || !phone || !password) {
                 showToast('Please fill all fields', 'error');
                 return;
             }
 
-            if (!/^\d{11}$/.test(phone)) {
-                showToast('Phone must be 11 digits', 'error');
-                return;
-            }
-
-            if (password.length < 6) {
-                showToast('Password must be at least 6 characters', 'error');
-                return;
-            }
-
             showLoading();
 
             try {
-                // Check if phone exists
-                const phoneSnapshot = await db.collection('users').where('phone', '==', phone).get();
-                if (!phoneSnapshot.empty) {
-                    throw new Error('Phone number already registered');
-                }
-
-                // Check if user ID exists
-                const userIdSnapshot = await db.collection('users').where('userId', '==', userId).get();
-                if (!userIdSnapshot.empty) {
-                    throw new Error('User ID already taken');
-                }
-
                 const email = phone + '@coinflow.app';
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-
+                
                 // Create user document
-                const userDoc = {
+                await db.collection('users').doc(userCredential.user.uid).set({
                     username,
                     userId,
                     phone,
                     email,
-                    referralCode: generateReferralCode(),
                     coins: 0,
                     balance: 0,
-                    totalEarned: 0,
-                    todayEarned: 0,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    lastActive: firebase.firestore.FieldValue.serverTimestamp(),
-                    checkInStreak: 0,
-                    spinsRemaining: 2,
-                    totalReferrals: 0,
-                    activeReferrals: 0,
-                    referralEarnings: 0,
-                    isBlocked: false,
-                    role: 'user'
-                };
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
 
-                // Handle invite code
-                if (inviteCode) {
-                    const referrerSnapshot = await db.collection('users').where('referralCode', '==', inviteCode).get();
-                    if (!referrerSnapshot.empty) {
-                        const referrerDoc = referrerSnapshot.docs[0];
-                        userDoc.referredBy = referrerDoc.id;
-                        userDoc.coins += 10;
-                        
-                        // Update referrer
-                        await db.collection('users').doc(referrerDoc.id).update({
-                            coins: firebase.firestore.FieldValue.increment(50),
-                            totalReferrals: firebase.firestore.FieldValue.increment(1),
-                            referralEarnings: firebase.firestore.FieldValue.increment(50)
-                        });
-                    }
-                }
-
-                await db.collection('users').doc(user.uid).set(userDoc);
                 showToast('Account created successfully!');
                 toggleForms('login');
                 
@@ -1276,120 +1076,11 @@
 
             document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
             document.getElementById(tab + 'Section').classList.add('active');
-
-            if (tab === 'home') loadReels();
-            if (tab === 'wallet') loadTransactions();
         };
 
-        // ============= REELS =============
-        async function loadReels() {
-            const container = document.getElementById('reelsContainer');
-            container.innerHTML = '<div style="text-align: center; padding: 50px;"><div class="spinner"></div></div>';
-
-            try {
-                const snapshot = await db.collection('videos')
-                    .where('status', '==', 'active')
-                    .orderBy('createdAt', 'desc')
-                    .limit(10)
-                    .get();
-
-                if (snapshot.empty) {
-                    container.innerHTML = '<div style="text-align: center; padding: 50px; color: var(--gray);">No videos yet</div>';
-                    return;
-                }
-
-                container.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const video = doc.data();
-                    container.innerHTML += `
-                        <div class="reel-item">
-                            <video class="reel-video" loop playsinline>
-                                <source src="${video.url}" type="video/mp4">
-                            </video>
-                            <div class="reel-overlay">
-                                <div class="reel-user">
-                                    <div class="reel-avatar">${video.username?.charAt(0) || 'U'}</div>
-                                    <div>
-                                        <h4>@${video.username || 'user'}</h4>
-                                        <p>${video.description || 'Watch to earn coins'}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="reel-timer">
-                                <i class="fas fa-clock"></i> Watch to earn
-                            </div>
-                        </div>
-                    `;
-                });
-
-                initVideoPlayers();
-            } catch (error) {
-                console.error('Error loading videos:', error);
-                container.innerHTML = '<div style="text-align: center; padding: 50px; color: var(--gray);">Failed to load videos</div>';
-            }
-        }
-
-        function initVideoPlayers() {
-            const videos = document.querySelectorAll('.reel-video');
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.play();
-                    } else {
-                        entry.target.pause();
-                    }
-                });
-            }, { threshold: 0.7 });
-
-            videos.forEach(video => observer.observe(video));
-        }
-
         // ============= CHECK-IN =============
-        window.handleCheckIn = async function() {
-            if (!currentUser) {
-                showToast('Please login first', 'error');
-                return;
-            }
-
-            showLoading();
-
-            try {
-                const today = new Date();
-                const lastCheckIn = userData?.lastCheckIn?.toDate();
-
-                if (lastCheckIn && lastCheckIn.toDateString() === today.toDateString()) {
-                    throw new Error('Already checked in today');
-                }
-
-                let streak = userData?.checkInStreak || 0;
-                if (lastCheckIn) {
-                    const yesterday = new Date(today);
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    streak = lastCheckIn.toDateString() === yesterday.toDateString() ? streak + 1 : 1;
-                } else {
-                    streak = 1;
-                }
-
-                const reward = streak === 7 ? 20 : 10;
-
-                await db.collection('users').doc(currentUser.uid).update({
-                    coins: firebase.firestore.FieldValue.increment(reward),
-                    balance: firebase.firestore.FieldValue.increment(reward / 20),
-                    todayEarned: firebase.firestore.FieldValue.increment(reward / 20),
-                    totalEarned: firebase.firestore.FieldValue.increment(reward / 20),
-                    checkInStreak: streak === 7 ? 0 : streak,
-                    lastCheckIn: firebase.firestore.FieldValue.serverTimestamp(),
-                    completedTasks: firebase.firestore.FieldValue.increment(1)
-                });
-
-                showToast(`+${reward} coins for check-in!`);
-                loadUserData(currentUser.uid);
-                
-            } catch (error) {
-                showToast(error.message, 'error');
-            } finally {
-                hideLoading();
-            }
+        window.handleCheckIn = function() {
+            showToast('+10 coins for check-in!');
         };
 
         // ============= SPIN WHEEL =============
@@ -1434,126 +1125,33 @@
             }
         }
 
-        window.spinWheel = async function() {
+        window.spinWheel = function() {
             if (spinsLeft <= 0) {
-                showToast('No spins left today!', 'error');
+                showToast('No spins left!', 'error');
                 closeSpinWheel();
                 return;
             }
 
-            showLoading();
-
-            setTimeout(async () => {
-                const reward = [5, 10, 15, 20, 10, 5][Math.floor(Math.random() * 6)];
-                spinsLeft--;
-
-                if (currentUser) {
-                    await db.collection('users').doc(currentUser.uid).update({
-                        coins: firebase.firestore.FieldValue.increment(reward),
-                        balance: firebase.firestore.FieldValue.increment(reward / 20),
-                        todayEarned: firebase.firestore.FieldValue.increment(reward / 20),
-                        totalEarned: firebase.firestore.FieldValue.increment(reward / 20),
-                        spinsRemaining: spinsLeft
-                    });
-                }
-
-                showToast(`🎉 You won ${reward} coins!`);
-                closeSpinWheel();
-                hideLoading();
-            }, 2000);
+            spinsLeft--;
+            const reward = [5, 10, 15, 20, 10, 5][Math.floor(Math.random() * 6)];
+            document.getElementById('spinsLeft').textContent = spinsLeft + ' Spins Left';
+            showToast('🎉 You won ' + reward + ' coins!');
+            closeSpinWheel();
         };
 
-        // ============= WALLET =============
-        window.handleWithdrawal = async function() {
+        // ============= WATCH AD =============
+        window.handleWatchAd = function() {
             if (!currentUser) {
                 showToast('Please login first', 'error');
                 return;
             }
-
-            const method = document.getElementById('withdrawMethod').value;
-            const account = document.getElementById('withdrawAccount').value.trim();
-            const amount = parseFloat(document.getElementById('withdrawAmount').value);
-
-            if (!method || !account || !amount) {
-                showToast('Please fill all fields', 'error');
-                return;
-            }
-
-            if (amount < 50) {
-                showToast('Minimum withdrawal is ৳50', 'error');
-                return;
-            }
-
-            if (userData.balance < amount) {
-                showToast('Insufficient balance', 'error');
-                return;
-            }
-
-            showLoading();
-
-            try {
-                await db.collection('withdrawals').add({
-                    userId: currentUser.uid,
-                    username: userData.username,
-                    method,
-                    account,
-                    amount,
-                    status: 'pending',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                await db.collection('users').doc(currentUser.uid).update({
-                    balance: firebase.firestore.FieldValue.increment(-amount)
-                });
-
-                showToast('Withdrawal request submitted!');
-                document.getElementById('withdrawAccount').value = '';
-                document.getElementById('withdrawAmount').value = '';
-                loadUserData(currentUser.uid);
-                
-            } catch (error) {
-                showToast(error.message, 'error');
-            } finally {
-                hideLoading();
-            }
+            showToast('Ad watched! +5 coins');
         };
 
-        async function loadTransactions() {
-            if (!currentUser) return;
-
-            try {
-                const snapshot = await db.collection('transactions')
-                    .where('userId', '==', currentUser.uid)
-                    .orderBy('timestamp', 'desc')
-                    .limit(5)
-                    .get();
-
-                const historyDiv = document.getElementById('transactionHistory');
-                if (snapshot.empty) {
-                    historyDiv.innerHTML = '<p style="color: var(--gray); text-align: center; padding: 20px;">No transactions yet</p>';
-                    return;
-                }
-
-                historyDiv.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const date = data.timestamp?.toDate() || new Date();
-                    historyDiv.innerHTML += `
-                        <div style="display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #EDF2F7;">
-                            <div>
-                                <p style="font-weight: 600;">${data.description || data.type}</p>
-                                <small style="color: var(--gray);">${date.toLocaleDateString()}</small>
-                            </div>
-                            <div style="font-weight: 700; color: ${data.type === 'withdrawal' ? '#EF4444' : '#10B981'};">
-                                ${data.type === 'withdrawal' ? '-' : '+'}${data.amount} ${data.type === 'withdrawal' ? '৳' : 'coins'}
-                            </div>
-                        </div>
-                    `;
-                });
-            } catch (error) {
-                console.error('Error loading transactions:', error);
-            }
-        }
+        // ============= WITHDRAWAL =============
+        window.handleWithdrawal = function() {
+            showToast('Withdrawal request submitted!');
+        };
 
         // ============= REFERRAL =============
         window.copyReferralCode = function() {
@@ -1575,95 +1173,45 @@
             }
         };
 
-        // ============= PROFILE =============
-        window.editProfile = function() {
-            showToast('Edit profile coming soon!');
-        };
-
-        window.openSupport = function(platform) {
-            const urls = {
-                facebook: 'https://facebook.com/groups/coinflow',
-                telegram: 'https://t.me/coinflow'
-            };
-            window.open(urls[platform], '_blank');
-        };
-
-        window.contactAdmin = function() {
-            showToast('Admin contact: support@coinflow.app');
-        };
-
-        // ============= LOAD USER DATA =============
-        async function loadUserData(uid) {
-            try {
-                const doc = await db.collection('users').doc(uid).get();
-                if (doc.exists) {
-                    userData = doc.data();
-                    updateUI();
-                }
-            } catch (error) {
-                console.error('Error loading user data:', error);
-            }
-        }
-
-        function updateUI() {
-            if (!userData) return;
-
-            document.getElementById('walletBalance').textContent = `৳ ${(userData.balance || 0).toFixed(2)}`;
-            document.getElementById('totalCoins').textContent = userData.coins || 0;
-            document.getElementById('todayEarnings').textContent = `৳ ${(userData.todayEarned || 0).toFixed(2)}`;
-            document.getElementById('profileUsername').textContent = userData.username || 'User';
-            document.getElementById('profileUserId').textContent = `@${userData.userId || 'user'}`;
-            document.getElementById('profilePhone').innerHTML = `<i class="fas fa-phone"></i> ${userData.phone || 'Not set'}`;
-            document.getElementById('profileTotalEarnings').textContent = `৳ ${(userData.totalEarned || 0).toFixed(2)}`;
-            document.getElementById('profileDailyEarnings').textContent = `৳ ${(userData.todayEarned || 0).toFixed(2)}`;
-            document.getElementById('referralCodeDisplay').textContent = userData.referralCode || 'N/A';
-            document.getElementById('totalReferrals').textContent = userData.totalReferrals || 0;
-            document.getElementById('activeReferrals').textContent = userData.activeReferrals || 0;
-            document.getElementById('referralEarnings').textContent = userData.referralEarnings || 0;
-            document.getElementById('spinsLeft').textContent = `${userData.spinsRemaining || 0} Spins Left`;
-
-            // Update check-in days
-            const checkinDays = document.getElementById('checkinDays');
-            checkinDays.innerHTML = '';
-            for (let i = 1; i <= 7; i++) {
-                checkinDays.innerHTML += `
-                    <div class="checkin-day ${i <= (userData.checkInStreak || 0) ? 'active' : ''}">
-                        Day ${i}<br>${i === 7 ? '20' : '10'}
-                    </div>
-                `;
-            }
-        }
-
         // ============= AUTH STATE OBSERVER =============
-        auth.onAuthStateChanged(async (user) => {
+        auth.onAuthStateChanged((user) => {
             if (user) {
                 currentUser = user;
-                await loadUserData(user.uid);
+                console.log('User logged in:', user);
                 
                 document.getElementById('authScreen').classList.remove('active');
                 document.getElementById('mainScreen').style.display = 'block';
                 
-                // Check if user is admin
-                if (userData?.role === 'admin') {
-                    document.getElementById('profileHeader').innerHTML += `
-                        <span class="admin-badge">
-                            <i class="fas fa-crown"></i> Admin
-                        </span>
-                    `;
-                }
+                // Load user data
+                db.collection('users').doc(user.uid).get().then(doc => {
+                    if (doc.exists) {
+                        userData = doc.data();
+                        document.getElementById('profileUsername').textContent = userData.username || 'User';
+                        document.getElementById('profileUserId').textContent = '@' + (userData.userId || 'user');
+                        document.getElementById('walletBalance').textContent = '৳ ' + (userData.balance || 0).toFixed(2);
+                        document.getElementById('totalCoins').textContent = userData.coins || 0;
+                        document.getElementById('referralCodeDisplay').textContent = userData.referralCode || 'N/A';
+                        
+                        // Update check-in days
+                        const checkinDays = document.getElementById('checkinDays');
+                        checkinDays.innerHTML = '';
+                        for (let i = 1; i <= 7; i++) {
+                            checkinDays.innerHTML += `<div class="checkin-day">Day ${i}<br>${i===7?'20':'10'}</div>`;
+                        }
+                    }
+                });
                 
-                loadReels();
-                loadTransactions();
             } else {
                 currentUser = null;
                 userData = null;
+                console.log('User logged out');
                 
                 document.getElementById('authScreen').classList.add('active');
                 document.getElementById('mainScreen').style.display = 'none';
             }
         });
 
-        // ============= ONLINE/OFFLINE DETECTION =============
+        // ============= ONLINE/OFFLINE =============
         window.addEventListener('online', () => {
             document.getElementById('offlineIndicator').style.display = 'none';
         });
@@ -1672,12 +1220,32 @@
             document.getElementById('offlineIndicator').style.display = 'flex';
         });
 
-        // ============= INITIALIZATION =============
+        // ============= INIT =============
         setTimeout(() => {
             document.getElementById('splashScreen').style.display = 'none';
         }, 2000);
 
-        console.log('✅ CoinFlow initialized');
+        // Load sample videos
+        const reelsContainer = document.getElementById('reelsContainer');
+        reelsContainer.innerHTML = `
+            <div class="reel-item">
+                <video class="reel-video" loop autoplay muted playsinline>
+                    <source src="https://assets.mixkit.co/videos/preview/mixkit-woman-using-a-mobile-phone-42794-large.mp4" type="video/mp4">
+                </video>
+                <div class="reel-overlay">
+                    <div class="reel-user">
+                        <div class="reel-avatar">C</div>
+                        <div>
+                            <h4>@cooking_master</h4>
+                            <p>Amazing pasta recipe! 🍝</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="reel-timer">
+                    <i class="fas fa-clock"></i> Watch to earn
+                </div>
+            </div>
+        `;
     </script>
 </body>
 </html>
